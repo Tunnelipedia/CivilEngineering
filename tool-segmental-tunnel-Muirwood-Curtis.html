@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TBM Segmental Lining — Service Loads (Elastic Continuum Method)</title>
+<style>
+  :root{
+    --input-bg:#FAF8F5;
+    --input-accent:#3D5A73;
+    --output-bg:#F0F4F7;
+    --output-accent:#1B4F72;
+    --divider:#D5D0C8;
+    --warn:#D68910;
+    --fail:#B0413E;
+    --pass:#3F7D5C;
+    --ns-color:#1B4F72;
+    --fs-color:#7E9AAE;
+    --text:#2B2B28;
+    --text-light:#6b6b66;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family:'Inter','Roboto',Arial,sans-serif; color:var(--text); background:#EDEBE5; }
+  header.appbar{ background:#fff; border-bottom:1px solid var(--divider); padding:14px 22px; }
+  header.appbar h1{ margin:0 0 3px 0; font-size:19px; color:var(--output-accent); font-weight:700;}
+  header.appbar .meta{ font-size:12.5px; color:var(--text-light); }
+  header.appbar .meta b{ color:var(--input-accent); }
+  .layout{ display:flex; align-items:flex-start; min-height:calc(100vh - 64px); }
+  .col-input{
+    width:37%; background:var(--input-bg); border-right:1.5px solid var(--divider);
+    padding:18px 18px 0 18px; max-height:calc(100vh - 64px); overflow-y:auto; position:sticky; top:0;
+  }
+  .col-output{ width:63%; background:var(--output-bg); padding:20px 24px 40px 24px; }
+  @media (max-width:900px){
+    .layout{flex-direction:column;}
+    .col-input,.col-output{width:100%; max-height:none; position:static;}
+    .col-input{border-right:none; border-bottom:1.5px solid var(--divider);}
+  }
+  fieldset{ border:none; border-top:1px solid var(--divider); padding:12px 0 6px 0; margin:0 0 4px 0; }
+  legend{ font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; font-weight:700; color:var(--input-accent); padding:0; margin-bottom:8px; }
+  .field{ margin-bottom:10px; }
+  .field label{ display:block; font-size:13px; font-weight:500; color:var(--text); margin-bottom:3px; }
+  .field .unit{ color:var(--text-light); font-weight:400; }
+  .field input[type=number], .field select{
+    width:100%; padding:7px 8px; border:1px solid #C9C2B4; border-radius:4px;
+    font-size:13.5px; font-family:inherit; background:#fff; color:var(--text);
+  }
+  .field input:focus{ outline:none; border-color:var(--input-accent); box-shadow:0 0 0 2px rgba(61,90,115,.15); }
+  .row2{ display:flex; gap:10px; }
+  .row2 > div{ flex:1; }
+  .radiogroup label{ display:flex; align-items:center; gap:6px; font-weight:400; font-size:13px; margin-bottom:5px;}
+  .radiogroup input{ accent-color:var(--input-accent); }
+  .helper{ font-size:11.5px; color:var(--text-light); margin-top:2px; line-height:1.4;}
+  .inline-btn{ background:none; border:1px solid var(--input-accent); color:var(--input-accent);
+    font-size:11.5px; padding:3px 8px; border-radius:3px; cursor:pointer; margin-top:4px; }
+  .inline-btn:hover{ background:var(--input-accent); color:#fff; }
+  .sticky-calc{ position:sticky; bottom:0; background:var(--input-bg); padding:14px 0 16px 0; border-top:1px solid var(--divider); margin-top:8px; }
+  #calcBtn{ width:100%; padding:12px; font-size:15px; font-weight:700; letter-spacing:.02em;
+    background:var(--input-accent); color:#fff; border:none; border-radius:5px; cursor:pointer; }
+  #calcBtn:hover{ background:#2f4a5f; }
+
+  .out-section{ margin-bottom:26px; }
+  .out-section h2{ font-size:14.5px; color:var(--output-accent); text-transform:uppercase; letter-spacing:.05em;
+    border-bottom:1.5px solid var(--output-accent); padding-bottom:5px; margin:0 0 12px 0; }
+  .card{ background:#fff; border:1px solid var(--divider); border-radius:6px; padding:14px 16px; }
+  .paramgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px 18px; }
+  .param{ font-size:12.5px; }
+  .param .k{ color:var(--text-light); }
+  .param .v{ font-family:'Roboto Mono',monospace; font-size:14.5px; font-weight:600; color:var(--output-accent); }
+  .summary-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:14px;}
+  .scard{ background:#fff; border:1px solid var(--divider); border-radius:6px; padding:10px 12px;}
+  .scard .lbl{ font-size:11px; color:var(--text-light); text-transform:uppercase; letter-spacing:.04em;}
+  .scard .val{ font-family:'Roboto Mono',monospace; font-size:19px; font-weight:700; color:var(--output-accent); margin-top:2px;}
+  .scard .loc{ font-size:11px; color:var(--text-light); margin-top:1px;}
+  table.datatable{ width:100%; border-collapse:collapse; font-size:12px; }
+  table.datatable th{ background:var(--output-bg); border-bottom:2px solid var(--output-accent); color:var(--output-accent);
+    padding:5px 7px; text-align:right; font-size:10.5px; text-transform:uppercase; letter-spacing:.02em; }
+  table.datatable th:first-child, table.datatable td:first-child{ text-align:left; }
+  table.datatable th.grp{ text-align:center; border-bottom:1px solid var(--output-accent); }
+  table.datatable td{ padding:4px 7px; border-bottom:1px solid var(--divider); font-family:'Roboto Mono',monospace; text-align:right; }
+  table.datatable tr:hover td{ background:#F7FAFC; }
+  table.datatable td.rowlabel{ font-family:'Inter',sans-serif; text-align:left; font-weight:600; color:var(--text); }
+  .note{ font-size:12px; color:var(--text-light); background:#fff; border-left:3px solid var(--input-accent);
+    padding:8px 12px; border-radius:0 4px 4px 0; margin-top:10px; line-height:1.5;}
+  footer.disclaimer{ border-top:2px solid var(--divider); padding:16px 24px 24px 24px; font-size:11.5px; color:var(--text-light);
+    background:#EDEBE5; line-height:1.6; }
+  footer.disclaimer b{ color:var(--text); }
+  svg.chart{ width:100%; height:auto; display:block; }
+  .labelfont{ font-family:'Inter',sans-serif; font-size:10.5px; fill:var(--text-light); }
+  .calloutfont{ font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700; }
+  .combo-card{ margin-bottom:16px; }
+  .combo-card h3{ font-size:12.5px; color:var(--input-accent); margin:0 0 8px 0; text-transform:uppercase; letter-spacing:.04em; }
+
+  .mini-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+  .mini-card{ background:#fff; border:1px solid var(--divider); border-radius:6px; padding:8px 6px 6px 6px; text-align:center; }
+  .mini-title{ font-size:11px; font-weight:600; color:var(--text); margin-bottom:2px; line-height:1.3; }
+  .unit-caption{ font-size:11px; color:var(--text-light); margin:4px 0 12px 0; text-align:right; }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <h1>TBM Segmental Lining — Service Loads: Axial Thrust &amp; Bending Moment</h1>
+  <div class="meta">
+    Method: <b>Elastic Continuum (Ground–Structure Interaction)</b> — Muir Wood (1975) / Curtis (1976), implemented via the verified closed-form
+    formulation of <b>Einstein &amp; Schwartz (1979)</b>, "Simplified Analysis for Tunnel Supports", <i>ASCE J. Geotech. Engr. Div.</i> 105(GT4).
+    Deep-tunnel, plane-strain, linear-elastic ground &amp; lining.
+  </div>
+</header>
+
+<div class="layout">
+  <div class="col-input">
+
+    <fieldset>
+      <legend>Tunnel &amp; Lining Geometry</legend>
+      <div class="field">
+        <label>Internal diameter, D<sub>i</sub> <span class="unit">(m)</span></label>
+        <input type="number" id="Di" value="6.00" step="0.05">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Lining thickness, t <span class="unit">(mm)</span></label>
+          <input type="number" id="t" value="350" step="10">
+        </div>
+        <div class="field">
+          <label>Depth to axis, H <span class="unit">(m)</span></label>
+          <input type="number" id="Haxis" value="20" step="0.5">
+        </div>
+      </div>
+      <div class="helper">Centroidal ring radius R = D<sub>i</sub>/2 + t/2 is used in all equations below.</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Ground Properties</legend>
+      <div class="row2">
+        <div class="field">
+          <label>Bulk unit wt, γ <span class="unit">(kN/m³)</span></label>
+          <input type="number" id="gammaBulk" value="18" step="0.5">
+        </div>
+        <div class="field">
+          <label>Submerged unit wt, γ′ <span class="unit">(kN/m³)</span></label>
+          <input type="number" id="gammaSub" value="10" step="0.5">
+        </div>
+      </div>
+      <div class="field">
+        <label>Depth to water table <span class="unit">(m from surface)</span></label>
+        <input type="number" id="waterDepth" value="5" step="0.5">
+        <div class="helper">Both a <b>full water head</b> case (hydrostatic pressure per this depth) and a <b>dry</b> case (no water pressure) are always evaluated together below, for design comparison.</div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Ground deformation modulus, E₀ <span class="unit">(MPa)</span></label>
+          <input type="number" id="E0" value="50" step="1">
+        </div>
+        <div class="field">
+          <label>Ground Poisson's ratio, ν₀</label>
+          <input type="number" id="nu0" value="0.30" step="0.01">
+        </div>
+      </div>
+      <div class="field">
+        <label>Lateral earth pressure coeff., K (= σ′<sub>h</sub>/σ′<sub>v</sub>)</label>
+        <input type="number" id="K0" value="0.50" step="0.05">
+        <div class="helper">
+          Quick estimate from φ′ (Rankine, K₀ = 1 − sinφ′):
+          <input type="number" id="phiHelp" placeholder="φ′ (deg)" style="width:80px; display:inline-block; margin-left:6px; padding:3px 6px; font-size:12px;">
+          <button type="button" class="inline-btn" onclick="estimateK0()">Use</button>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Surface Surcharge</legend>
+      <div class="field">
+        <label>Uniform surcharge, q <span class="unit">(kPa)</span></label>
+        <input type="number" id="q" value="10" step="1">
+        <div class="helper">Applied as an addition to overburden at axis level (both vertical &amp; horizontal, via K) — deep-tunnel simplification; not valid for narrow/point surcharges.</div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Segmental Lining Material</legend>
+      <div class="row2">
+        <div class="field">
+          <label>Concrete secant modulus, E<sub>l</sub> <span class="unit">(GPa)</span></label>
+          <input type="number" id="El" value="33" step="1">
+        </div>
+        <div class="field">
+          <label>Concrete Poisson's ratio, ν<sub>l</sub></label>
+          <input type="number" id="nul" value="0.20" step="0.01">
+        </div>
+      </div>
+      <div class="field">
+        <label>Effective bending stiffness ratio, I<sub>eff</sub>/I<sub>full</sub></label>
+        <input type="number" id="stiffRatio" value="0.80" step="0.05" min="0" max="1">
+        <div class="helper">
+          Reduced ring stiffness at radial joints (Muir Wood, 1975, eq. 47 approx.: I<sub>e</sub>/I ≈ (4/n)² for hinge-like joints, n = no. of standard segments, n&gt;4). Use 1.0 for a monolithic assumption.
+          n = <input type="number" id="nSeg" placeholder="e.g. 6" style="width:60px; display:inline-block; padding:3px 6px; font-size:12px;">
+          <button type="button" class="inline-btn" onclick="estimateStiffRatio()">Estimate</button>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Interface Condition</legend>
+      <div class="field radiogroup">
+        <label><input type="radio" name="interface" value="both" checked> Show both No-slip &amp; Full-slip</label>
+        <label><input type="radio" name="interface" value="noslip"> No-slip (full bond) only</label>
+        <label><input type="radio" name="interface" value="fullslip"> Full-slip (frictionless) only</label>
+      </div>
+    </fieldset>
+
+    <div class="sticky-calc">
+      <button id="calcBtn" onclick="runCalc()">Calculate &amp; Plot</button>
+    </div>
+  </div>
+
+  <div class="col-output">
+
+    <div class="out-section">
+      <h2>Computed Parameters</h2>
+      <div class="card"><div class="paramgrid" id="paramOut"></div></div>
+    </div>
+
+    <div class="out-section">
+      <h2>Governing Values (Envelope)</h2>
+      <div class="summary-cards" id="summaryOut"></div>
+    </div>
+
+    <div class="out-section">
+      <h2>Bending Moment — Ring Diagrams</h2>
+      <div id="gridM" class="mini-grid"></div>
+      <div class="unit-caption">Values in kNm/m · positive = per source formulation (see method note)</div>
+      <div class="note"><b>Why the Full water head and Dry diagrams look identical for a given interface:</b> water pressure is a uniform radial load. By thin-ring theory, a uniform radial pressure produces pure hoop thrust — it has no eccentricity and therefore contributes exactly zero bending moment. So M(θ) is genuinely, mathematically independent of the water condition; only the axial thrust N(θ) changes between wet and dry. This is expected behaviour, not a calculation error — both diagrams are still shown per case for direct side-by-side comparison with the thrust diagrams below.</div>
+    </div>
+
+    <div class="out-section">
+      <h2>Axial Thrust — Ring Diagrams</h2>
+      <div id="gridT" class="mini-grid"></div>
+      <div class="unit-caption">Values in kN/m (compression positive)</div>
+    </div>
+
+    <div class="out-section">
+      <h2>Deformed Ring Shape — Ring Diagrams</h2>
+      <div id="gridU" class="mini-grid"></div>
+      <div class="unit-caption">Values in mm · positive = inward (convergence), negative = outward (extrusion)</div>
+      <div class="note">Shape is the exact smooth cos2θ solution (no numerical interpolation/kinks), exaggerated radially for visibility — diagrams are schematic, not to true geometric scale. Verify sign/magnitude independently before using for serviceability (gap/convergence) checks.</div>
+    </div>
+
+    <div class="out-section">
+      <h2>Critical Force Combinations (for M–N section design)</h2>
+      <div id="comboOut"></div>
+      <div class="note">Because M(θ) and N(θ) are both pure A + B·cos2θ functions, their true extremes occur exactly at θ = 0°/180° (springlines) and 90°/270° (crown/invert) — found here analytically, not by numerical search. "Corr." values are read at the <i>same</i> θ as the extreme, for direct use in M–N interaction/section checks.</div>
+    </div>
+
+    <div class="out-section">
+      <h2>Values Around the Ring (every 30°)</h2>
+      <table class="datatable" id="dataTable"></table>
+    </div>
+
+    <div class="note">
+      <b>Method note:</b> θ is measured counter-clockwise from the right springline (θ = 0°); crown = 90°, left springline = 180°, invert = 270°.
+      This elastic-continuum closed form assumes a deep tunnel (uniform far-field stress across the ring), a "wished-in-place" lining, and a homogeneous, isotropic, linear-elastic ground and lining — it does not capture staged construction, ground non-linearity, layered strata, or explicit radial-joint articulation (only the smeared stiffness-ratio approximation above). Use it as a preliminary/cross-check tool, not a substitute for a validated bedded-beam-spring or FE model for final design.
+    </div>
+
+  </div>
+</div>
+
+<footer class="disclaimer">
+  <b>Disclaimer:</b> This tool is provided for preliminary and educational use only. Results should be independently verified by a qualified engineer before use in design or construction. This is not a substitute for professional judgment or compliance verification against the applicable project-specific code requirements.
+</footer>
+
+<script>
+function estimateK0(){
+  const phi = parseFloat(document.getElementById('phiHelp').value);
+  if(!isNaN(phi)){ document.getElementById('K0').value = (1 - Math.sin(phi*Math.PI/180)).toFixed(3); }
+}
+function estimateStiffRatio(){
+  const n = parseFloat(document.getElementById('nSeg').value);
+  if(!isNaN(n) && n>4){ document.getElementById('stiffRatio').value = Math.min(1, Math.pow(4/n,2)).toFixed(3); }
+}
+function toRad(d){ return d*Math.PI/180; }
+function fmt(x,d){ if(x===undefined||x===null||isNaN(x)) return '—'; return x.toFixed(d===undefined?1:d); }
+
+const NS_COLOR = '#1B4F72';
+const FS_COLOR = '#7E9AAE';
+
+function computeAll(p){
+  const R = p.Di/2 + p.t/1000/2;
+  const t = p.t/1000;
+  const A = t;
+  const Ifull = Math.pow(t,3)/12;
+  const I = Ifull * p.stiffRatio;
+  const E0 = p.E0*1000;      // MPa -> kPa
+  const El = p.El*1e6;       // GPa -> kPa
+  const nu0 = p.nu0, nul = p.nul;
+
+  const C = E0*R*(1-nul*nul) / (El*A*(1-nu0*nu0));
+  const F = E0*Math.pow(R,3)*(1-nul*nul) / (El*I*(1-nu0*nu0));
+
+  const Dw = p.waterDepth, H = p.Haxis;
+  const sigmaV = (Dw >= H) ? (p.gammaBulk*H + p.q) : (p.gammaBulk*Dw + p.gammaSub*(H-Dw) + p.q);
+  const P = sigmaV;
+  const K = p.K0;
+
+  const PwFull = (Dw < H) ? 9.81*(H-Dw) : 0;   // water pressure at axis, full head
+  const NwFull = PwFull*R;
+
+  const a0 = C*F*(1-nu0) / (C+F+C*F*(1-nu0));
+  const beta = ((6+F)*C*(1-nu0) + 2*F*nu0) / (3*F+3*C+2*C*F*(1-nu0));
+  const b2 = C*(1-nu0) / (2*(C*(1-nu0)+4*nu0-6*beta-3*beta*C*(1-nu0)));
+  const a2ns = beta*b2;
+  const a2fs = (F+6)*(1-nu0) / (2*F*(1-nu0) + 6*(5-6*nu0));
+
+  function Tns_ground(th){ const c2=Math.cos(2*toRad(th)); return P*R/2*((1+K)*(1-a0) + (1-K)*(1+2*a2ns)*c2); }
+  function Mns(th){ const c2=Math.cos(2*toRad(th)); return P*R*R/2*(0.5*(1-K)*(1-2*a2ns+2*b2)*c2); }
+  function Tfs_ground(th){ const c2=Math.cos(2*toRad(th)); return P*R/2*((1+K)*(1-a0) + (1-K)*(1-2*a2fs)*c2); }
+  function Mfs(th){ const c2=Math.cos(2*toRad(th)); return P*R*R/2*((1-K)*(1-2*a2fs)*c2); }
+
+  function Uns(th){ const c2=Math.cos(2*toRad(th));
+    return P*R*(1+nu0)/E0*(0.5*(1+K)*a0 + 0.5*(1-K)*(4*(1-nu0)*b2 - 2*a2ns)*c2); }
+  function Ufs(th){ const c2=Math.cos(2*toRad(th));
+    return P*R*(1+nu0)/E0*(0.5*(1+K)*a0 - (1-K)*((5-6*nu0)*a2fs - (1-nu0))*c2); }
+
+  const dU_water = NwFull*R/(El*A); // uniform additional hoop closure from water thrust (thin-ring), metres
+
+  return {
+    R,A,I,Ifull,C,F,P,K,PwFull,NwFull,a0,a2ns,b2,a2fs,
+    Tns_wet:  th=>Tns_ground(th)+NwFull,
+    Tns_dry:  th=>Tns_ground(th),
+    Tfs_wet:  th=>Tfs_ground(th)+NwFull,
+    Tfs_dry:  th=>Tfs_ground(th),
+    Mns, Mfs,
+    Uns_wet_mm: th=>(Uns(th)+dU_water)*1000,
+    Uns_dry_mm: th=>Uns(th)*1000,
+    Ufs_wet_mm: th=>(Ufs(th)+dU_water)*1000,
+    Ufs_dry_mm: th=>Ufs(th)*1000
+  };
+}
+
+function pointOnRing(cx,cy,r,thetaDeg){
+  const rad = toRad(thetaDeg);
+  return {x: cx + r*Math.cos(rad), y: cy - r*Math.sin(rad)};
+}
+
+// Shared scale across a set of functions so diagrams in the same grid are visually comparable
+function computeSharedScale(fns, baseR, fracOfBase){
+  let maxAbs = 0.0001;
+  fns.forEach(fn=>{ for(let a=0;a<360;a+=5){ maxAbs = Math.max(maxAbs, Math.abs(fn(a))); } });
+  return baseR*(fracOfBase||0.32)/maxAbs;
+}
+
+// Single-series mini ring diagram with on-diagram callouts at the 4 cardinal points
+function buildMiniRing(fn, scale, opts){
+  opts = opts||{};
+  const W=210, H=210, cx=105, cy=100, baseR=56;
+  const radialSign = opts.radialSign || 1;
+  const color = opts.color || NS_COLOR;
+  const dash = opts.dash || 'none';
+  const decimals = opts.decimals!==undefined ? opts.decimals : 1;
+
+  let svg = `<svg class="chart mini" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  svg += `<circle cx="${cx}" cy="${cy}" r="${baseR}" fill="none" stroke="#C9C2B4" stroke-width="1" stroke-dasharray="4,3"/>`;
+
+  let pts=[];
+  for(let a=0;a<360;a+=3){
+    const val = fn(a);
+    const rr = baseR + radialSign*val*scale;
+    const pt = pointOnRing(cx,cy,rr,a);
+    pts.push(`${pt.x.toFixed(1)},${pt.y.toFixed(1)}`);
+  }
+  svg += `<polygon points="${pts.join(' ')}" fill="${color}1c" stroke="${color}" stroke-width="2" stroke-dasharray="${dash}"/>`;
+
+  const cardinals = [
+    {a:90,  yoff:-6,  anchor:'middle'},
+    {a:270, yoff:15,  anchor:'middle'},
+    {a:0,   xoff:5, anchor:'start'},
+    {a:180, xoff:-5, anchor:'end'}
+  ];
+  cardinals.forEach(c=>{
+    const val = fn(c.a);
+    const rr = baseR + radialSign*val*scale;
+    const markerPt = pointOnRing(cx,cy,rr,c.a);
+    const labelPt = pointOnRing(cx,cy,baseR*1.38,c.a);
+    svg += `<line x1="${markerPt.x.toFixed(1)}" y1="${markerPt.y.toFixed(1)}" x2="${labelPt.x.toFixed(1)}" y2="${labelPt.y.toFixed(1)}" stroke="#C9C2B4" stroke-width="0.8"/>`;
+    svg += `<text class="calloutfont" x="${(labelPt.x+(c.xoff||0)).toFixed(1)}" y="${(labelPt.y+(c.yoff!==undefined?c.yoff:3)).toFixed(1)}" text-anchor="${c.anchor}" fill="${color}">${fmt(val,decimals)}</text>`;
+  });
+
+  svg += `</svg>`;
+  return svg;
+}
+
+function buildGrid(cases, fnKey, opts){
+  opts = opts||{};
+  const fns = cases.map(c=>c[fnKey]);
+  const scale = computeSharedScale(fns, 56, opts.fracOfBase);
+  let html='';
+  cases.forEach(c=>{
+    html += `<div class="mini-card">
+      <div class="mini-title">${c.ifLabel} — ${c.waterLabel}</div>
+      ${buildMiniRing(c[fnKey], scale, {color:c.color, dash:c.dash, radialSign:opts.radialSign, decimals:opts.decimals})}
+    </div>`;
+  });
+  return html;
+}
+
+function evalExtremesFromCardinals(fn){
+  const angles=[0,90,180,270];
+  const vals = angles.map(a=>({a, v:fn(a)}));
+  let mx = vals.reduce((p,c)=>c.v>p.v?c:p);
+  let mn = vals.reduce((p,c)=>c.v<p.v?c:p);
+  function tieLabel(picked){
+    const partner = (picked.a===0)?180:(picked.a===180)?0:(picked.a===90)?270:90;
+    const pv = vals.find(v=>v.a===partner).v;
+    if(Math.abs(pv-picked.v) < Math.abs(picked.v)*1e-6 + 1e-9) return `${Math.min(picked.a,partner)}° / ${Math.max(picked.a,partner)}°`;
+    return `${picked.a}°`;
+  }
+  return {max:{v:mx.v, a:mx.a, label:tieLabel(mx)}, min:{v:mn.v, a:mn.a, label:tieLabel(mn)}};
+}
+
+function runCalc(){
+  const p = {
+    Di: parseFloat(document.getElementById('Di').value),
+    t: parseFloat(document.getElementById('t').value),
+    Haxis: parseFloat(document.getElementById('Haxis').value),
+    gammaBulk: parseFloat(document.getElementById('gammaBulk').value),
+    gammaSub: parseFloat(document.getElementById('gammaSub').value),
+    waterDepth: parseFloat(document.getElementById('waterDepth').value),
+    E0: parseFloat(document.getElementById('E0').value),
+    nu0: parseFloat(document.getElementById('nu0').value),
+    K0: parseFloat(document.getElementById('K0').value),
+    q: parseFloat(document.getElementById('q').value),
+    El: parseFloat(document.getElementById('El').value),
+    nul: parseFloat(document.getElementById('nul').value),
+    stiffRatio: parseFloat(document.getElementById('stiffRatio').value)
+  };
+  const mode = document.querySelector('input[name=interface]:checked').value;
+  const interfaces = (mode==='both') ? ['noslip','fullslip'] : [mode];
+  const r = computeAll(p);
+
+  const IF_LABEL = {noslip:'No-slip', fullslip:'Full-slip'};
+  const IF_COLOR = {noslip:NS_COLOR, fullslip:FS_COLOR};
+  const M_FN   = {noslip:r.Mns, fullslip:r.Mfs};
+  const T_WET  = {noslip:r.Tns_wet, fullslip:r.Tfs_wet};
+  const T_DRY  = {noslip:r.Tns_dry, fullslip:r.Tfs_dry};
+  const U_WET  = {noslip:r.Uns_wet_mm, fullslip:r.Ufs_wet_mm};
+  const U_DRY  = {noslip:r.Uns_dry_mm, fullslip:r.Ufs_dry_mm};
+
+  // ---- Params card ----
+  document.getElementById('paramOut').innerHTML = `
+    <div class="param"><div class="k">Centroidal radius, R</div><div class="v">${fmt(r.R,3)} m</div></div>
+    <div class="param"><div class="k">Compressibility ratio, C*</div><div class="v">${fmt(r.C,4)}</div></div>
+    <div class="param"><div class="k">Flexibility ratio, F*</div><div class="v">${fmt(r.F,2)}</div></div>
+    <div class="param"><div class="k">Vertical eff. stress at axis, P</div><div class="v">${fmt(r.P,1)} kPa</div></div>
+    <div class="param"><div class="k">Lateral coeff., K</div><div class="v">${fmt(r.K,3)}</div></div>
+    <div class="param"><div class="k">Water pressure at axis (full head)</div><div class="v">${fmt(r.PwFull,1)} kPa</div></div>
+    <div class="param"><div class="k">I<sub>eff</sub> (used)</div><div class="v">${(r.I*1e6).toFixed(1)}×10⁻⁶ m⁴/m</div></div>
+    <div class="param"><div class="k">a₀*</div><div class="v">${fmt(r.a0,4)}</div></div>
+  `;
+
+  // ---- Build the 4 (or 2) cases: interface x water ----
+  const cases = [];
+  interfaces.forEach(k=>{
+    ['wet','dry'].forEach(w=>{
+      cases.push({
+        key: k+'_'+w,
+        ifLabel: IF_LABEL[k],
+        waterLabel: (w==='wet') ? 'Full water head' : 'Dry',
+        color: IF_COLOR[k],
+        dash: (w==='wet') ? 'none' : '6,3,1,3',
+        Mfn: M_FN[k],
+        Tfn: (w==='wet') ? T_WET[k] : T_DRY[k],
+        Ufn: (w==='wet') ? U_WET[k] : U_DRY[k]
+      });
+    });
+  });
+
+  document.getElementById('gridM').innerHTML = buildGrid(cases,'Mfn',{radialSign:1, decimals:1});
+  document.getElementById('gridT').innerHTML = buildGrid(cases,'Tfn',{radialSign:1, decimals:0});
+  document.getElementById('gridU').innerHTML = buildGrid(cases,'Ufn',{radialSign:-1, decimals:2, fracOfBase:0.26});
+
+  // ---- Governing values (quick envelope across everything shown) ----
+  let allM=[], allN=[];
+  interfaces.forEach(k=>{
+    [0,90,180,270].forEach(a=>{
+      allM.push({v:M_FN[k](a), a, label:IF_LABEL[k]});
+      allN.push({v:T_WET[k](a), a, label:IF_LABEL[k]+' (wet)'});
+      allN.push({v:T_DRY[k](a), a, label:IF_LABEL[k]+' (dry)'});
+    });
+  });
+  const Mmax = allM.reduce((p,c)=>c.v>p.v?c:p), Mmin = allM.reduce((p,c)=>c.v<p.v?c:p);
+  const Nmax = allN.reduce((p,c)=>c.v>p.v?c:p), Nmin = allN.reduce((p,c)=>c.v<p.v?c:p);
+  document.getElementById('summaryOut').innerHTML = `
+    <div class="scard"><div class="lbl">M max</div><div class="val">${fmt(Mmax.v,1)}</div><div class="loc">kNm/m at θ=${Mmax.a}° (${Mmax.label})</div></div>
+    <div class="scard"><div class="lbl">M min</div><div class="val">${fmt(Mmin.v,1)}</div><div class="loc">kNm/m at θ=${Mmin.a}° (${Mmin.label})</div></div>
+    <div class="scard"><div class="lbl">N max</div><div class="val">${fmt(Nmax.v,0)}</div><div class="loc">kN/m at θ=${Nmax.a}° (${Nmax.label})</div></div>
+    <div class="scard"><div class="lbl">N min</div><div class="val">${fmt(Nmin.v,0)}</div><div class="loc">kN/m at θ=${Nmin.a}° (${Nmin.label})</div></div>
+  `;
+
+  // ---- Critical M-N combinations, per interface case ----
+  let comboHtml = '';
+  interfaces.forEach(k=>{
+    const mExt = evalExtremesFromCardinals(M_FN[k]);
+    const nWetExt = evalExtremesFromCardinals(T_WET[k]);
+    const nDryExt = evalExtremesFromCardinals(T_DRY[k]);
+    const rows = [
+      {case:'Max M', th:mExt.max.label, M:mExt.max.v, Nwet:T_WET[k](mExt.max.a), Ndry:T_DRY[k](mExt.max.a)},
+      {case:'Min M', th:mExt.min.label, M:mExt.min.v, Nwet:T_WET[k](mExt.min.a), Ndry:T_DRY[k](mExt.min.a)},
+      {case:'Max N (wet)', th:nWetExt.max.label, M:M_FN[k](nWetExt.max.a), Nwet:nWetExt.max.v, Ndry:T_DRY[k](nWetExt.max.a)},
+      {case:'Min N (wet)', th:nWetExt.min.label, M:M_FN[k](nWetExt.min.a), Nwet:nWetExt.min.v, Ndry:T_DRY[k](nWetExt.min.a)},
+      {case:'Max N (dry)', th:nDryExt.max.label, M:M_FN[k](nDryExt.max.a), Nwet:T_WET[k](nDryExt.max.a), Ndry:nDryExt.max.v},
+      {case:'Min N (dry)', th:nDryExt.min.label, M:M_FN[k](nDryExt.min.a), Nwet:T_WET[k](nDryExt.min.a), Ndry:nDryExt.min.v}
+    ];
+    let body = rows.map(row=>`<tr><td class="rowlabel">${row.case}</td><td>${row.th}</td><td>${fmt(row.M,1)}</td><td>${fmt(row.Nwet,0)}</td><td>${fmt(row.Ndry,0)}</td></tr>`).join('');
+    comboHtml += `
+      <div class="combo-card card">
+        <h3>${IF_LABEL[k]}</h3>
+        <table class="datatable">
+          <thead><tr><th>Case</th><th>θ</th><th>M (kNm/m)</th><th>N wet (kN/m)</th><th>N dry (kN/m)</th></tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>`;
+  });
+  document.getElementById('comboOut').innerHTML = comboHtml;
+
+  // ---- 30-degree table ----
+  const tableAngles=[0,30,60,90,120,150,180,210,240,270,300,330];
+  function posLabel(th){ return th===0?'Springline (R)': th===90?'Crown': th===180?'Springline (L)': th===270?'Invert':''; }
+  let groupHead = `<th rowspan="2">θ</th><th rowspan="2">Position</th>`;
+  interfaces.forEach(k=>{ groupHead += `<th class="grp" colspan="3">${IF_LABEL[k]}</th>`; });
+  let subHead = '';
+  interfaces.forEach(()=>{ subHead += `<th>M (kNm/m)</th><th>N wet (kN/m)</th><th>N dry (kN/m)</th>`; });
+  let body='';
+  tableAngles.forEach(a=>{
+    body += `<tr><td>${a}°</td><td>${posLabel(a)}</td>`;
+    interfaces.forEach(k=>{
+      body += `<td>${fmt(M_FN[k](a),1)}</td><td>${fmt(T_WET[k](a),0)}</td><td>${fmt(T_DRY[k](a),0)}</td>`;
+    });
+    body += `</tr>`;
+  });
+  document.getElementById('dataTable').innerHTML = `<thead><tr>${groupHead}</tr><tr>${subHead}</tr></thead><tbody>${body}</tbody>`;
+}
+
+window.addEventListener('load', runCalc);
+</script>
+</body>
+</html>
