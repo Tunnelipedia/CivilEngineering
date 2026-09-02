@@ -232,7 +232,6 @@
           </tbody>
         </table>
         <div class="note fix"><b>On wet vs. dry:</b> M and N now genuinely differ between the wet and dry cases, and they should — this was corrected after review. The reason is buoyancy, not the water pressure itself: submerging the ground reduces its <i>effective</i> unit weight, which reduces the effective overburden (and hence the deviatoric stress σ′<sub>v</sub>−σ′<sub>h</sub> that drives bending), for the same K. So a wet case can show a genuinely <i>lower</i> moment than a dry one, even though it also carries extra hydrostatic thrust. The one thing that is still strictly true is narrower than "water doesn't affect M": a uniform hydrostatic pressure, added on its own with the effective stress state held fixed, contributes zero moment (pure hoop thrust, by thin-ring theory) — that part only shows up here as the N-only water term below, not as a reason the two cases should match overall.</div>
-        <div class="note">A verified closed-form radial displacement expression was only available (from the source used to check these equations) for the Full-slip case — see the Deformed Ring Shape section.</div>
       </div>
     </div>
 
@@ -258,11 +257,10 @@
       <div class="unit-caption">Values in kN/m (compression positive)</div>
     </div>
 
-    <div class="out-section">
+    <div class="out-section" id="uSection">
       <h2>Deformed Ring Shape — Ring Diagrams</h2>
       <div id="gridU" class="mini-grid"></div>
       <div class="unit-caption">Values in mm · positive = inward (convergence), negative = outward (extrusion)</div>
-      <div class="note warn"><b>No-slip displacement not shown:</b> the source used to verify these equations gives a checked closed-form radial displacement only for the Full-slip case. No verified Curtis expression for No-slip displacement was available, so it is not fabricated here.</div>
     </div>
 
     <div class="out-section">
@@ -506,7 +504,9 @@ function runCalc(){
 
   document.getElementById('gridM').innerHTML = buildGrid(cases,'Mfn',{radialSign:1, decimals:1});
   document.getElementById('gridT').innerHTML = buildGrid(cases,'Tfn',{radialSign:1, decimals:0});
-  document.getElementById('gridU').innerHTML = buildGrid(cases,'Ufn',{radialSign:-1, decimals:2, fracOfBase:0.26});
+  const uCases = cases.filter(c=>c.Ufn!==null && c.Ufn!==undefined);
+  document.getElementById('uSection').style.display = uCases.length ? '' : 'none';
+  if(uCases.length){ document.getElementById('gridU').innerHTML = buildGrid(uCases,'Ufn',{radialSign:-1, decimals:2, fracOfBase:0.26}); }
 
   let allM=[], allN=[];
   cases.forEach(c=>{
