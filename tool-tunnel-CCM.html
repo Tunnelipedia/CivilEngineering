@@ -229,8 +229,9 @@ table.resulttable td.num, table.resulttable th.num{
 .kv-grid div.k{color:#5b6570;}
 .kv-grid div.v{font-family:var(--mono); text-align:right; color:#1c2a33; font-weight:600;}
 .chart-wrap{margin-top:8px;}
-.chart-wrap svg{width:100%; height:auto; display:block;}
-.legend{display:flex; gap:16px; font-size:11.5px; margin-bottom:4px; flex-wrap:wrap;}
+.chart-wrap svg{width:100%; max-width:520px; height:auto; display:block; margin:0 auto;}
+#tunnelSectionChart svg{max-width:360px;}
+.legend{display:flex; gap:16px; font-size:11.5px; margin-bottom:4px; flex-wrap:wrap; justify-content:center;}
 .legend span{display:inline-flex; align-items:center; gap:5px;}
 .legend i{width:12px; height:3px; display:inline-block; border-radius:1px;}
 .note-box{
@@ -281,9 +282,10 @@ table.resulttable td.num, table.resulttable th.num{
       <div class="field"><label>Tunnel (excavation) radius R₀<span class="hint">equivalent circular radius, m</span></label><input type="number" id="ro" value="4.0" step="0.1"></div>
       <div class="field"><label>Overburden depth H<span class="hint">used for σ₃max estimate, m</span></label><input type="number" id="depthH" value="200" step="1"></div>
       <div class="field"><label>Rock unit weight γ<span class="hint">MN/m³ (0.023–0.027 typ.)</span></label><input type="number" id="gammaRock" value="0.025" step="0.001"></div>
-      <div class="field"><label>In-situ stress p₀<span class="hint">MPa (hydrostatic, K₀=1)</span></label><input type="number" id="p0" value="5.0" step="0.1"></div>
-      <div class="small-note">p₀ can be entered directly, or estimated as γ·H — click below to overwrite p₀ with γ·H.</div>
-      <button type="button" id="estP0Btn" style="margin-top:6px; font-size:11.5px; padding:4px 8px; border:1px solid var(--input-accent); background:#fff; color:var(--input-accent); border-radius:3px; cursor:pointer;">Estimate p₀ = γ·H</button>
+      <div class="field"><label>Coefficient of earth pressure K₀<span class="hint">σ<sub>h</sub>/σ<sub>v</sub>, in-plane (1.0 = hydrostatic)</span></label><input type="number" id="k0" value="1.0" step="0.05"></div>
+      <div class="field"><label>In-situ stress p₀<span class="hint">MPa — used directly by the (axisymmetric) GRC</span></label><input type="number" id="p0" value="5.0" step="0.1"></div>
+      <div class="small-note">The GRC assumes equal (hydrostatic) stress in the tunnel's cross-sectional plane. For non-hydrostatic ground, p₀ is best taken as the average of the two in-plane principal stresses: p₀ = σ<sub>v</sub>(1+K₀)/2, where σ<sub>v</sub> = γ·H. This ignores the out-of-plane (axial) stress, which does not enter the plane-strain GRC, and is itself an approximation — reliable roughly for K₀ in the range 0.5–2; outside that range crown/invert vs. sidewall behaviour diverges more than a single axisymmetric curve can represent.</div>
+      <button type="button" id="estP0Btn" style="margin-top:6px; font-size:11.5px; padding:4px 8px; border:1px solid var(--input-accent); background:#fff; color:var(--input-accent); border-radius:3px; cursor:pointer;">Estimate p₀ = σ<sub>v</sub>(1+K₀)/2</button>
     </div>
 
     <div class="section">
@@ -353,15 +355,64 @@ table.resulttable td.num, table.resulttable th.num{
     </div>
 
     <div class="section">
-      <h2>7 · Support — Steel Sets / Ribs</h2>
-      <div class="enable-row"><span class="toggle-label">Include steel sets</span><input type="checkbox" id="enSteel"></div>
+      <h2>7 · Support — Steel Sets / Ribs / Lattice Girders</h2>
+      <div class="enable-row"><span class="toggle-label">Include steel ribs</span><input type="checkbox" id="enSteel"></div>
       <div class="subsection" id="steelFields">
-        <div class="field"><label>Section area A<sub>s</sub><span class="hint">cm²</span></label><input type="number" id="Asteel" value="45" step="1"></div>
+        <div class="radio-row">
+          <label><input type="radio" name="steelType" value="rolled" checked> Rolled steel set</label>
+          <label><input type="radio" name="steelType" value="lattice"> Lattice girder</label>
+        </div>
+
+        <div id="rolledAreaField">
+          <div class="field"><label>Section area A<sub>s</sub><span class="hint">cm²</span></label><input type="number" id="Asteel" value="45" step="1"></div>
+        </div>
+
+        <div id="latticeFields" style="display:none;">
+          <div class="radio-row">
+            <label><input type="radio" name="latticeMethod" value="direct" checked> Direct input</label>
+            <label><input type="radio" name="latticeMethod" value="calc"> Calculate from geometry</label>
+          </div>
+          <div id="latticeDirectField">
+            <div class="field"><label>Effective section area A<sub>s</sub><span class="hint">cm²</span></label><input type="number" id="AsteelLatticeDirect" value="15" step="0.5"></div>
+          </div>
+          <div id="latticeGeomFields" style="display:none;">
+            <div class="small-note" style="margin-bottom:8px;">"Chords" are the main longitudinal bars running the length of the girder (top and bottom) — the same terminology as a roof truss's top/bottom chords. They're connected by diagonal lacing bars, which provide shear capacity and are not modelled here.</div>
+            <div class="lg-sketch" style="max-width:250px; margin:0 auto 10px auto;">
+              <svg viewBox="0 0 260 150" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; display:block;">
+                <line x1="70" y1="34" x2="130" y2="112" stroke="#B9C2C9" stroke-width="1.4" stroke-dasharray="3,3"/>
+                <line x1="130" y1="112" x2="190" y2="34" stroke="#B9C2C9" stroke-width="1.4" stroke-dasharray="3,3"/>
+                <line x1="70" y1="34" x2="190" y2="34" stroke="#B9C2C9" stroke-width="1" stroke-dasharray="2,2"/>
+                <circle cx="70" cy="34" r="8" fill="#EAF0F4" stroke="#3D5A73" stroke-width="1.8"/>
+                <circle cx="190" cy="34" r="8" fill="#EAF0F4" stroke="#3D5A73" stroke-width="1.8"/>
+                <circle cx="130" cy="112" r="9.5" fill="#F5EEE0" stroke="#D68910" stroke-width="1.8"/>
+                <line x1="230" y1="34" x2="230" y2="112" stroke="#33404A" stroke-width="1"/>
+                <line x1="225" y1="34" x2="235" y2="34" stroke="#33404A" stroke-width="1"/>
+                <line x1="225" y1="112" x2="235" y2="112" stroke="#33404A" stroke-width="1"/>
+                <text x="238" y="76" font-size="10" fill="#33404A" text-anchor="start">H</text>
+                <text x="8" y="16" font-size="9.5" fill="#3D5A73">top chords: n_top × d_top</text>
+                <text x="8" y="144" font-size="9.5" fill="#D68910">bottom chord(s): n_bot × d_bot</text>
+                <text x="80" y="76" font-size="8.5" fill="#93998f" font-style="italic">lacing (not modelled)</text>
+              </svg>
+              <div style="font-size:10px; color:#7a7566; text-align:center; margin-top:2px;">Schematic — chord count shown is illustrative, not tied to your inputs below</div>
+            </div>
+            <div class="field"><label>Top chords, n<sub>top</sub></label><input type="number" id="lgNTop" value="2" step="1" min="0"></div>
+            <div class="field"><label>Top chord diameter, d<sub>top</sub><span class="hint">mm</span></label><input type="number" id="lgChordDiaTop" value="22" step="1"></div>
+            <div class="field"><label>Bottom chords, n<sub>bot</sub></label><input type="number" id="lgNBot" value="1" step="1" min="0"></div>
+            <div class="field"><label>Bottom chord diameter, d<sub>bot</sub><span class="hint">mm</span></label><input type="number" id="lgChordDiaBot" value="22" step="1"></div>
+            <div class="field"><label>Girder height, H<span class="hint">mm, chord c/c</span></label><input type="number" id="lgHeight" value="100" step="5"></div>
+            <div class="small-note">Lacing bars are neglected (shear-only contribution); only the longitudinal chords are counted toward axial area and inertia — a standard simplification for preliminary sizing.</div>
+            <div class="kv-grid" id="lgComputedBox" style="margin-top:8px; background:#fff; border:1px solid var(--divider); border-radius:3px; padding:6px 8px;">
+              <div class="k">Computed A<sub>s</sub></div><div class="v" id="lgAOut">—</div>
+              <div class="k">Computed I (about bending axis)</div><div class="v" id="lgIOut">—</div>
+            </div>
+          </div>
+        </div>
+
         <div class="field"><label>Modulus E<sub>s</sub><span class="hint">GPa</span></label><input type="number" id="Esteel" value="200" step="1"></div>
         <div class="field"><label>Yield strength σ<sub>y</sub><span class="hint">MPa</span></label><input type="number" id="sigmaYSteel" value="250" step="5"></div>
         <div class="field"><label>Longitudinal spacing S<sub>l</sub><span class="hint">m</span></label><input type="number" id="SlSteel" value="1.0" step="0.1"></div>
       </div>
-      <div class="small-note">Simplified compression-ring model (uniform radial pressure); blocking/packing effects and bending capacity are not modelled.</div>
+      <div class="small-note">Simplified compression-ring model (uniform radial pressure) for both rolled sections and lattice girders; blocking/packing effects and bending capacity are not modelled — the computed lattice-girder inertia is reported for reference only and is not used in this axial-ring calculation.</div>
     </div>
 
     <div class="calc-btn-wrap">
@@ -578,6 +629,21 @@ function steelSCC(Ro, As_cm2, Es_GPa, sigmaY, Sl){
   return {K, pmax};
 }
 
+/* Equivalent area & moment of inertia of a 2-row lattice girder (longitudinal chords only,
+   lacing bars neglected). nTop/nBot chords of (possibly different) diameters dTop_mm/dBot_mm,
+   separated by height H_LG_mm between chord rows. Parallel-axis theorem about the centroidal axis. */
+function latticeGirderSection(nTop, nBot, dTop_mm, dBot_mm, H_LG_mm){
+  const AchordTop = Math.PI/4*Math.pow(dTop_mm/1000, 2); // m^2, per top bar
+  const AchordBot = Math.PI/4*Math.pow(dBot_mm/1000, 2); // m^2, per bottom bar
+  const Atotal = nTop*AchordTop + nBot*AchordBot; // m^2
+  const H = H_LG_mm/1000; // m
+  const ybar = Atotal>0 ? (H*nTop*AchordTop)/Atotal : 0; // centroid measured from bottom chord row (area-weighted)
+  const IselfTop = Math.PI/64*Math.pow(dTop_mm/1000, 4); // m^4, per top bar, about its own centroid
+  const IselfBot = Math.PI/64*Math.pow(dBot_mm/1000, 4); // m^4, per bottom bar, about its own centroid
+  const Itotal = nTop*(IselfTop + AchordTop*Math.pow(H-ybar,2)) + nBot*(IselfBot + AchordBot*Math.pow(ybar,2)); // m^4
+  return {A_m2: Atotal, A_cm2: Atotal*1e4, I_m4: Itotal, I_cm4: Itotal*1e8};
+}
+
 /* =====================================================================
    5) SVG CHART HELPER
 ===================================================================== */
@@ -776,8 +842,24 @@ function runCalculation(){
     supportEls.push({name:'Rockbolts', ...r});
   }
   if(enSteel){
-    const r = steelSCC(Ro, parseFloat($('Asteel').value), parseFloat($('Esteel').value), parseFloat($('sigmaYSteel').value), parseFloat($('SlSteel').value));
-    supportEls.push({name:'Steel sets', ...r});
+    const steelType = document.querySelector('input[name=steelType]:checked').value;
+    let As_cm2, elName;
+    if(steelType==='rolled'){
+      As_cm2 = parseFloat($('Asteel').value);
+      elName = 'Steel set (rolled)';
+    } else {
+      const latticeMethod = document.querySelector('input[name=latticeMethod]:checked').value;
+      if(latticeMethod==='direct'){
+        As_cm2 = parseFloat($('AsteelLatticeDirect').value);
+        elName = 'Lattice girder (direct input)';
+      } else {
+        const lg = latticeGirderSection(parseFloat($('lgNTop').value), parseFloat($('lgNBot').value), parseFloat($('lgChordDiaTop').value), parseFloat($('lgChordDiaBot').value), parseFloat($('lgHeight').value));
+        As_cm2 = lg.A_cm2;
+        elName = `Lattice girder (A=${As_cm2.toFixed(1)} cm², I=${lg.I_cm4.toFixed(0)} cm⁴)`;
+      }
+    }
+    const r = steelSCC(Ro, As_cm2, parseFloat($('Esteel').value), parseFloat($('sigmaYSteel').value), parseFloat($('SlSteel').value));
+    supportEls.push({name:elName, ...r});
   }
 
   function elementPressure(el, us){
@@ -1019,11 +1101,39 @@ wireEnableToggle('enShotcrete','shotFields');
 wireEnableToggle('enBolts','boltFields');
 wireEnableToggle('enSteel','steelFields');
 
+/* steel type / lattice girder wiring */
+function syncSteelTypeUI(){
+  const steelType = document.querySelector('input[name=steelType]:checked').value;
+  $('rolledAreaField').style.display = steelType==='rolled' ? 'block':'none';
+  $('latticeFields').style.display = steelType==='lattice' ? 'block':'none';
+}
+document.querySelectorAll('input[name=steelType]').forEach(r=>r.addEventListener('change', syncSteelTypeUI));
+syncSteelTypeUI();
+
+function syncLatticeMethodUI(){
+  const latticeMethod = document.querySelector('input[name=latticeMethod]:checked').value;
+  $('latticeDirectField').style.display = latticeMethod==='direct' ? 'block':'none';
+  $('latticeGeomFields').style.display = latticeMethod==='calc' ? 'block':'none';
+  if(latticeMethod==='calc') updateLgPreview();
+}
+document.querySelectorAll('input[name=latticeMethod]').forEach(r=>r.addEventListener('change', syncLatticeMethodUI));
+syncLatticeMethodUI();
+
+function updateLgPreview(){
+  const lg = latticeGirderSection(parseFloat($('lgNTop').value)||0, parseFloat($('lgNBot').value)||0, parseFloat($('lgChordDiaTop').value)||0, parseFloat($('lgChordDiaBot').value)||0, parseFloat($('lgHeight').value)||0);
+  $('lgAOut').textContent = lg.A_cm2.toFixed(2)+' cm²';
+  $('lgIOut').textContent = lg.I_cm4.toFixed(1)+' cm⁴';
+}
+['lgNTop','lgNBot','lgChordDiaTop','lgChordDiaBot','lgHeight'].forEach(id=>$(id).addEventListener('input', updateLgPreview));
+updateLgPreview();
+
 $('estP0Btn').addEventListener('click', ()=>{
   const gamma = parseFloat($('gammaRock').value);
   const H = parseFloat($('depthH').value);
-  if(!isNaN(gamma) && !isNaN(H)){
-    $('p0').value = (gamma*H).toFixed(2);
+  const K0 = parseFloat($('k0').value);
+  if(!isNaN(gamma) && !isNaN(H) && !isNaN(K0)){
+    const sigmaV = gamma*H;
+    $('p0').value = (sigmaV*(1+K0)/2).toFixed(2);
   }
 });
 
