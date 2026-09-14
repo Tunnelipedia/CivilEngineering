@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tunnel Support Design — GRC / LDP / SCC</title>
+<style>
+:root{
+  --divider:#D5D0C8;
+  --input-bg:#FAF8F5;
+  --input-bg2:#F5F3EE;
+  --input-accent:#3D5A73;
+  --output-bg:#F0F4F7;
+  --output-accent:#1B4F72;
+  --warn:#D68910;
+  --fail:#B0413E;
+  --pass:#3F7D5C;
+  --sans: -apple-system, "Segoe UI", Roboto, "Inter", Helvetica, Arial, sans-serif;
+  --mono: "Roboto Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:#EDEAE3;font-family:var(--sans);color:#22303B;}
+
+/* ---------- header ---------- */
+.header{
+  background:#fff;
+  border-bottom:2px solid var(--output-accent);
+  padding:14px 24px;
+}
+.header h1{
+  margin:0 0 2px 0;
+  font-size:19px;
+  letter-spacing:.2px;
+  color:var(--output-accent);
+}
+.header .method-ref{
+  font-size:12.5px;
+  color:#4A5560;
+  font-family:var(--mono);
+}
+.header .disclaimer{
+  margin-top:8px;
+  font-size:11px;
+  color:#6b6558;
+  border-top:1px dashed var(--divider);
+  padding-top:6px;
+  line-height:1.4;
+}
+
+/* ---------- layout ---------- */
+.main-layout{
+  display:flex;
+  align-items:flex-start;
+  min-height:calc(100vh - 120px);
+}
+@media (max-width:900px){
+  .main-layout{flex-direction:column;}
+  .input-panel{width:100% !important; max-height:none !important; position:relative !important; top:0 !important;}
+  .divider{display:none;}
+}
+
+.input-panel{
+  width:38%;
+  background:var(--input-bg);
+  padding:18px 18px 90px 18px;
+  max-height:calc(100vh - 120px);
+  overflow-y:auto;
+  position:sticky;
+  top:0;
+}
+.divider{
+  width:2px;
+  align-self:stretch;
+  background:var(--divider);
+}
+.output-panel{
+  width:62%;
+  background:var(--output-bg);
+  padding:20px 24px 60px 24px;
+}
+
+/* ---------- input styling ---------- */
+.section{
+  background:var(--input-bg2);
+  border:1px solid var(--divider);
+  border-radius:4px;
+  padding:12px 14px;
+  margin-bottom:14px;
+}
+.section h2{
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  color:var(--input-accent);
+  margin:0 0 10px 0;
+  padding-bottom:6px;
+  border-bottom:1px solid var(--divider);
+}
+.field{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+.field label{
+  font-size:13px;
+  font-weight:500;
+  color:#33404A;
+  flex:1.5;
+}
+.field .hint{
+  display:block;
+  font-size:10.5px;
+  font-weight:400;
+  color:#7a7566;
+}
+.field input[type=number], .field select{
+  flex:1;
+  width:100%;
+  max-width:118px;
+  padding:5px 7px;
+  font-family:var(--mono);
+  font-size:13px;
+  border:1px solid #c9c2b3;
+  border-radius:3px;
+  background:#fff;
+  color:#1c2a33;
+}
+.field input:focus, .field select:focus{
+  outline:none;
+  border-color:var(--input-accent);
+  box-shadow:0 0 0 2px rgba(61,90,115,0.15);
+}
+.radio-row{display:flex; gap:14px; margin-bottom:10px; flex-wrap:wrap;}
+.radio-row label{font-size:12.5px; display:flex; align-items:center; gap:4px; color:#33404A; font-weight:500;}
+.enable-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+.enable-row .toggle-label{font-size:13px; font-weight:600; color:var(--input-accent);}
+.subsection{border-top:1px dashed var(--divider); margin-top:8px; padding-top:8px;}
+.subsection.disabled{opacity:.4; pointer-events:none;}
+.small-note{font-size:11px; color:#7a7566; margin-top:2px; line-height:1.4;}
+
+.calc-btn-wrap{
+  position:sticky;
+  bottom:0;
+  background:linear-gradient(to top, var(--input-bg) 60%, rgba(250,248,245,0));
+  padding-top:14px;
+  margin-top:6px;
+}
+#calcBtn{
+  width:100%;
+  padding:12px;
+  background:var(--input-accent);
+  color:#fff;
+  border:none;
+  border-radius:4px;
+  font-size:14.5px;
+  font-weight:600;
+  letter-spacing:.3px;
+  cursor:pointer;
+}
+#calcBtn:hover{background:#2d4560;}
+#calcBtn:active{transform:translateY(1px);}
+
+/* ---------- output styling ---------- */
+.out-section{
+  background:#fff;
+  border:1px solid var(--divider);
+  border-radius:4px;
+  padding:16px 18px;
+  margin-bottom:18px;
+}
+.out-section h2{
+  font-size:14px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  color:var(--output-accent);
+  margin:0 0 12px 0;
+}
+.out-section h3{
+  font-size:12.5px;
+  color:var(--output-accent);
+  margin:14px 0 6px 0;
+}
+.placeholder{
+  color:#8a93a0;
+  font-size:13px;
+  font-style:italic;
+}
+table.resulttable{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+table.resulttable th, table.resulttable td{
+  text-align:left;
+  padding:6px 8px;
+  border-bottom:1px solid #E1E6EA;
+}
+table.resulttable th{
+  color:var(--output-accent);
+  font-size:11.5px;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+  font-weight:600;
+}
+table.resulttable td.num, table.resulttable th.num{
+  font-family:var(--mono);
+  text-align:right;
+}
+.pill{
+  display:inline-block;
+  font-family:var(--mono);
+  font-size:11.5px;
+  font-weight:700;
+  padding:2px 8px;
+  border-radius:10px;
+  color:#fff;
+}
+.pill.pass{background:var(--pass);}
+.pill.warn{background:var(--warn);}
+.pill.fail{background:var(--fail);}
+.kv-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px 18px;
+  font-size:12.5px;
+}
+.kv-grid div.k{color:#5b6570;}
+.kv-grid div.v{font-family:var(--mono); text-align:right; color:#1c2a33; font-weight:600;}
+.chart-wrap{margin-top:8px;}
+.chart-wrap svg{width:100%; height:auto; display:block;}
+.legend{display:flex; gap:16px; font-size:11.5px; margin-bottom:4px; flex-wrap:wrap;}
+.legend span{display:inline-flex; align-items:center; gap:5px;}
+.legend i{width:12px; height:3px; display:inline-block; border-radius:1px;}
+.note-box{
+  background:#FBF7EE;
+  border:1px solid #E6DCC0;
+  border-radius:4px;
+  padding:10px 12px;
+  font-size:11.5px;
+  color:#6b5f3f;
+  margin-top:10px;
+  line-height:1.5;
+}
+.footer{
+  text-align:center;
+  font-size:11px;
+  color:#8a8577;
+  padding:14px;
+  border-top:1px solid var(--divider);
+  background:#fff;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Tunnel Support Design — Ground Reaction / Longitudinal Displacement / Support Characteristic Curves</h1>
+  <div class="method-ref">
+    GRC: Duncan-Fama closed-form (Mohr-Coulomb) &nbsp;|&nbsp; Generalized Hoek-Brown via equivalent Mohr-Coulomb parameters (Hoek, Carranza-Torres &amp; Corkum, 2002) &nbsp;&mdash;&nbsp;
+    LDP: Vlachopoulos &amp; Diederichs (2009) or Panet (1995) &nbsp;&mdash;&nbsp;
+    SCC: Hoek, Kaiser &amp; Bawden (1995) closed-form support-stiffness equations &nbsp;&mdash;&nbsp;
+    FEM staging: LDP/GRC-derived ground relaxation (stress reduction) factor λ &nbsp;&mdash;&nbsp;
+    Convergence-Confinement Method (axisymmetric, circular tunnel, hydrostatic in-situ stress)
+  </div>
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This tool is provided for preliminary and educational use only. Results should be independently verified by a qualified engineer before use in design or construction.
+    This is not a substitute for professional judgment or compliance verification against the applicable project-specific code requirements. The convergence-confinement method assumes an
+    axisymmetric circular opening under hydrostatic (K₀=1) in-situ stress and plane-strain conditions; it does not capture non-circular geometry, anisotropic stress, groundwater, staged excavation
+    sequencing, or 3D face effects beyond the empirical LDP approximation used here.
+  </div>
+</div>
+
+<div class="main-layout">
+  <!-- ================= INPUT PANEL ================= -->
+  <div class="input-panel">
+
+    <div class="section">
+      <h2>1 · Tunnel Geometry &amp; In-Situ Stress</h2>
+      <div class="field"><label>Tunnel (excavation) radius R₀<span class="hint">equivalent circular radius, m</span></label><input type="number" id="ro" value="4.0" step="0.1"></div>
+      <div class="field"><label>Overburden depth H<span class="hint">used for σ₃max estimate, m</span></label><input type="number" id="depthH" value="200" step="1"></div>
+      <div class="field"><label>Rock unit weight γ<span class="hint">MN/m³ (0.023–0.027 typ.)</span></label><input type="number" id="gammaRock" value="0.025" step="0.001"></div>
+      <div class="field"><label>In-situ stress p₀<span class="hint">MPa (hydrostatic, K₀=1)</span></label><input type="number" id="p0" value="5.0" step="0.1"></div>
+      <div class="small-note">p₀ can be entered directly, or estimated as γ·H — click below to overwrite p₀ with γ·H.</div>
+      <button type="button" id="estP0Btn" style="margin-top:6px; font-size:11.5px; padding:4px 8px; border:1px solid var(--input-accent); background:#fff; color:var(--input-accent); border-radius:3px; cursor:pointer;">Estimate p₀ = γ·H</button>
+    </div>
+
+    <div class="section">
+      <h2>2 · Rock Mass Deformation Properties</h2>
+      <div class="field"><label>Rock mass modulus E<span class="hint">MPa</span></label><input type="number" id="Emod" value="2000" step="10"></div>
+      <div class="field"><label>Poisson's ratio ν</label><input type="number" id="nu" value="0.25" step="0.01"></div>
+      <div class="field"><label>Dilation angle ψ<span class="hint">degrees (0 = non-dilatant)</span></label><input type="number" id="psi" value="10" step="1"></div>
+    </div>
+
+    <div class="section">
+      <h2>3 · Rock Mass Strength Criterion</h2>
+      <div class="radio-row">
+        <label><input type="radio" name="grcMethod" value="mc" checked> Mohr-Coulomb</label>
+        <label><input type="radio" name="grcMethod" value="hb"> Generalized Hoek-Brown</label>
+      </div>
+
+      <div id="mcFields">
+        <div class="field"><label>Cohesion c<span class="hint">MPa</span></label><input type="number" id="cCoh" value="0.5" step="0.05"></div>
+        <div class="field"><label>Friction angle φ<span class="hint">degrees (&gt; 0.5°)</span></label><input type="number" id="phiFric" value="30" step="1"></div>
+      </div>
+
+      <div id="hbFields" style="display:none;">
+        <div class="field"><label>Intact UCS σ<sub>ci</sub><span class="hint">MPa</span></label><input type="number" id="sigci" value="50" step="1"></div>
+        <div class="field"><label>GSI</label><input type="number" id="gsi" value="45" step="1"></div>
+        <div class="field"><label>m<sub>i</sub></label><input type="number" id="mi" value="10" step="0.5"></div>
+        <div class="field"><label>Disturbance factor D</label><input type="number" id="dfac" value="0.3" step="0.1" min="0" max="1"></div>
+        <div class="field">
+          <label>σ₃max override<span class="hint">leave blank to auto-estimate (Hoek 2002)</span></label>
+          <input type="number" id="sig3maxOverride" placeholder="auto" step="0.1">
+        </div>
+        <div class="small-note">m<sub>b</sub>, s, a, σ<sub>cm</sub>, and equivalent c′/φ′ are computed and reported in the output panel.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>4 · Face Advance / Support Installation</h2>
+      <div class="radio-row">
+        <label><input type="radio" name="ldpMethod" value="vd" checked> Vlachopoulos &amp; Diederichs (2009)</label>
+        <label><input type="radio" name="ldpMethod" value="panet"> Panet (1995)</label>
+      </div>
+      <div class="field"><label>Support installed at distance behind face X<sub>i</sub><span class="hint">m (0 = at face)</span></label><input type="number" id="xInstall" value="2.0" step="0.1"></div>
+    </div>
+
+    <div class="section">
+      <h2>5 · Support — Shotcrete / Concrete Lining</h2>
+      <div class="enable-row"><span class="toggle-label">Include shotcrete lining</span><input type="checkbox" id="enShotcrete" checked></div>
+      <div class="subsection" id="shotFields">
+        <div class="field"><label>Thickness t<sub>c</sub><span class="hint">mm</span></label><input type="number" id="tc" value="150" step="5"></div>
+        <div class="field"><label>Modulus E<sub>c</sub><span class="hint">GPa</span></label><input type="number" id="Ec" value="20" step="1"></div>
+        <div class="field"><label>Poisson's ratio ν<sub>c</sub></label><input type="number" id="nuC" value="0.2" step="0.01"></div>
+        <div class="field"><label>Compressive strength σ<sub>cc</sub><span class="hint">MPa</span></label><input type="number" id="sigmaCC" value="25" step="1"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>6 · Support — Rockbolts</h2>
+      <div class="enable-row"><span class="toggle-label">Include pattern rockbolts</span><input type="checkbox" id="enBolts" checked></div>
+      <div class="subsection" id="boltFields">
+        <div class="field"><label>Bolt diameter<span class="hint">mm</span></label><input type="number" id="boltDia" value="25" step="1"></div>
+        <div class="field"><label>Bolt modulus E<sub>b</sub><span class="hint">GPa</span></label><input type="number" id="Eb" value="200" step="1"></div>
+        <div class="field"><label>Bolt (free) length L<sub>b</sub><span class="hint">m</span></label><input type="number" id="Lb" value="4.0" step="0.1"></div>
+        <div class="field"><label>Circumferential spacing S<sub>c</sub><span class="hint">m</span></label><input type="number" id="Sc" value="1.5" step="0.1"></div>
+        <div class="field"><label>Longitudinal spacing S<sub>l</sub><span class="hint">m</span></label><input type="number" id="SlBolt" value="1.5" step="0.1"></div>
+        <div class="field"><label>Ultimate bolt capacity T<sub>bf</sub><span class="hint">kN</span></label><input type="number" id="Tbf" value="200" step="10"></div>
+        <div class="field"><label>Anchor/plate deformation Q<span class="hint">mm/kN (0 = rigid)</span></label><input type="number" id="Qconst" value="0" step="0.01"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>7 · Support — Steel Sets / Ribs</h2>
+      <div class="enable-row"><span class="toggle-label">Include steel sets</span><input type="checkbox" id="enSteel"></div>
+      <div class="subsection" id="steelFields">
+        <div class="field"><label>Section area A<sub>s</sub><span class="hint">cm²</span></label><input type="number" id="Asteel" value="45" step="1"></div>
+        <div class="field"><label>Modulus E<sub>s</sub><span class="hint">GPa</span></label><input type="number" id="Esteel" value="200" step="1"></div>
+        <div class="field"><label>Yield strength σ<sub>y</sub><span class="hint">MPa</span></label><input type="number" id="sigmaYSteel" value="250" step="5"></div>
+        <div class="field"><label>Longitudinal spacing S<sub>l</sub><span class="hint">m</span></label><input type="number" id="SlSteel" value="1.0" step="0.1"></div>
+      </div>
+      <div class="small-note">Simplified compression-ring model (uniform radial pressure); blocking/packing effects and bending capacity are not modelled.</div>
+    </div>
+
+    <div class="calc-btn-wrap">
+      <button id="calcBtn">Calculate</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ================= OUTPUT PANEL ================= -->
+  <div class="output-panel" id="outputPanel">
+
+    <div class="out-section">
+      <h2>Summary</h2>
+      <div id="summaryBox"><p class="placeholder">Enter inputs on the left and click Calculate to run the convergence-confinement analysis.</p></div>
+    </div>
+
+    <div class="out-section">
+      <h2>Rock Mass &amp; Ground Reaction Parameters</h2>
+      <div id="rockParamsBox"><p class="placeholder">—</p></div>
+    </div>
+
+    <div class="out-section">
+      <h2>Tunnel Cross-Section — Plastic Zone Extent</h2>
+      <div class="chart-wrap" id="tunnelSectionChart"></div>
+      <div id="tunnelSectionNote"></div>
+    </div>
+
+    <div class="out-section">
+      <h2>Ground Reaction Curve (GRC)</h2>
+      <div class="chart-wrap" id="grcChart"></div>
+    </div>
+
+    <div class="out-section">
+      <h2>Longitudinal Displacement Profile (LDP)</h2>
+      <div class="chart-wrap" id="ldpChart"></div>
+    </div>
+
+    <div class="out-section">
+      <h2>Ground relaxation / Stress reduction factor</h2>
+      <div id="lambdaBox"></div>
+    </div>
+
+    <div class="out-section">
+      <h2>Ground–Support Interaction (Design Equilibrium)</h2>
+      <div class="chart-wrap" id="interactionChart"></div>
+      <div id="equilibriumBox"></div>
+    </div>
+
+    <div class="out-section">
+      <h2>Support Element Results</h2>
+      <div id="supportTableBox"><p class="placeholder">—</p></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">Civil / Tunnel Tools Suite &middot; tool-tunnel-support.html &middot; Convergence-Confinement (GRC / LDP / SCC)</div>
+
+<script>
+/* =====================================================================
+   UTILITIES
+===================================================================== */
+const $ = id => document.getElementById(id);
+const toRad = d => d*Math.PI/180;
+const toDeg = r => r*180/Math.PI;
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+/* linear interpolation lookup on a sorted-by-x array of {x,y} */
+function interpY(sortedPts, xq){
+  const n = sortedPts.length;
+  if(xq <= sortedPts[0].x) return sortedPts[0].y;
+  if(xq >= sortedPts[n-1].x) return sortedPts[n-1].y;
+  let lo=0, hi=n-1;
+  while(hi-lo>1){
+    const mid=(lo+hi)>>1;
+    if(sortedPts[mid].x < xq) lo=mid; else hi=mid;
+  }
+  const p0=sortedPts[lo], p1=sortedPts[hi];
+  const t = (xq-p0.x)/(p1.x-p0.x);
+  return p0.y + t*(p1.y-p0.y);
+}
+
+/* =====================================================================
+   1) MOHR-COULOMB GRC — Duncan-Fama closed form, with dilation
+===================================================================== */
+function computeMCParams(c, phiDeg){
+  const phi = toRad(phiDeg);
+  const Kphi = (1+Math.sin(phi))/(1-Math.sin(phi));
+  const sigma_cm = (2*c*Math.cos(phi))/(1-Math.sin(phi));
+  return {Kphi, sigma_cm};
+}
+
+/* returns array of {p,u} (u in m) from p=p0 down to p=0, plus pcr and RpMax */
+function computeGRC_MC(p0, Ro, E, nu, c, phiDeg, psiDeg, nSteps){
+  const {Kphi, sigma_cm} = computeMCParams(c, phiDeg);
+  const pcr = (2*p0 - sigma_cm)/(1+Kphi);
+  const psi = toRad(psiDeg);
+  const Kpsi = (1+Math.sin(psi))/(1-Math.sin(psi));
+
+  function RpOverRo(pi){
+    if(pi >= pcr) return 1.0;
+    const num = 2*(p0*(Kphi-1)+sigma_cm);
+    const den = (1+Kphi)*((Kphi-1)*pi+sigma_cm);
+    return Math.pow(num/den, 1/(Kphi-1));
+  }
+  function uAt(pi){
+    if(pi >= pcr){
+      return Ro*(1+nu)/E*(p0-pi);
+    }
+    const RpR = RpOverRo(pi);
+    let bracket;
+    if(Math.abs(Kpsi-1) < 1e-6){
+      bracket = 1.0; // reduces to the psi=0 no-dilation limit
+    } else {
+      bracket = 2*(1-nu) - (1-2*nu)*Math.pow(RpR, -(Kpsi-1));
+    }
+    return Ro*(1+nu)/E*(p0-pcr)*RpR*RpR*bracket;
+  }
+
+  const pts = [];
+  for(let i=0;i<=nSteps;i++){
+    const pi = p0*(1-i/nSteps);
+    pts.push({p: pi, u: uAt(pi)});
+  }
+  const RpMax = Ro*RpOverRo(0);
+  /* Plastic zone radius (m) for an arbitrary support pressure pi, 0<=pi<=p0.
+     Returns Ro (no plastic zone) if pi >= pcr. */
+  function RpAt(pi){
+    return Ro*RpOverRo(clamp(pi, 0, p0));
+  }
+  return {pts, pcr, RpMax, Kphi, sigma_cm, RpAt};
+}
+
+/* =====================================================================
+   2) GENERALIZED HOEK-BROWN -> equivalent Mohr-Coulomb
+      (Hoek, Carranza-Torres & Corkum, 2002)
+===================================================================== */
+function computeHBParams(sigci, GSI, mi, D, p0, gamma, H, sig3maxOverride){
+  const mb = mi*Math.exp((GSI-100)/(28-14*D));
+  const s  = Math.exp((GSI-100)/(9-3*D));
+  const a  = 0.5 + (1/6)*(Math.exp(-GSI/15) - Math.exp(-20/3));
+
+  const sigma_cm = sigci*((mb+4*s-a*(mb-8*s))*Math.pow(mb/4+s, a-1))/(2*(1+a)*(2+a));
+
+  let sigma3max;
+  if(sig3maxOverride !== null && !isNaN(sig3maxOverride) && sig3maxOverride > 0){
+    sigma3max = sig3maxOverride;
+  } else {
+    const overburden = (gamma*H > 0) ? gamma*H : p0; // fallback to p0 if depth data absent
+    sigma3max = sigma_cm * 0.47 * Math.pow(sigma_cm/overburden, -0.94);
+  }
+  const sig3n = sigma3max/sigci;
+
+  const powTerm = 6*a*mb*Math.pow(s+mb*sig3n, a-1);
+  const phi_r = Math.asin(powTerm/(2*(1+a)*(2+a)+powTerm));
+  const phi_deg = toDeg(phi_r);
+
+  const cNum = sigci*((1+2*a)*s + (1-a)*mb*sig3n)*Math.pow(s+mb*sig3n, a-1);
+  const cDen = (1+a)*(2+a)*Math.sqrt(1 + powTerm/((1+a)*(2+a)));
+  const c_eq = cNum/cDen;
+
+  return {mb, s, a, sigma_cm, sigma3max, sig3n, phi_deg, c_eq};
+}
+
+/* =====================================================================
+   3) LDP MODELS
+===================================================================== */
+function ldpFraction_VD(X, Ro, RpMax){
+  const Rpstar = RpMax/Ro;
+  const u0 = (1/3)*Math.exp(-0.15*Rpstar);
+  const xi = X/RpMax;
+  if(xi >= 0){
+    return 1 - (1-u0)*Math.exp(-1.5*xi);
+  } else {
+    return u0*Math.exp(xi);
+  }
+}
+function ldpFraction_Panet(X, Ro){
+  if(X >= 0){
+    const term = 0.75/(0.75+X/Ro);
+    return 0.29 + 0.71*(1 - term*term);
+  } else {
+    return 0.29*Math.exp(X/Ro);
+  }
+}
+
+/* =====================================================================
+   4) SUPPORT STIFFNESS / CAPACITY (Hoek, Kaiser & Bawden, 1995 style)
+      all internal units: m, MPa, MN
+===================================================================== */
+function shotcreteSCC(Ro, tc_mm, Ec_GPa, nuC, sigmaCC){
+  const tc = tc_mm/1000, Ec = Ec_GPa*1000; // MPa
+  const rin = Ro - tc;
+  const K = Ec*(Ro*Ro - rin*rin) / ((1+nuC)*Ro*((1-2*nuC)*Ro*Ro + rin*rin));
+  const pmax = (sigmaCC/2)*(1-(rin/Ro)*(rin/Ro));
+  return {K, pmax};
+}
+function boltsSCC(Ro, boltDia_mm, Eb_GPa, Lb, Sc, Sl, Tbf_kN, Q_mm_per_kN){
+  const Ab = Math.PI/4*Math.pow(boltDia_mm/1000,2); // m^2
+  const Eb = Eb_GPa*1000; // MPa
+  const Tbf = Tbf_kN/1000; // MN
+  const Q = Q_mm_per_kN; // mm/kN is numerically identical to m/MN (both unit ratios scale by 1000/1000)
+  const compliance = Lb/(Ab*Eb) + Q; // m/MN per bolt
+  const K = 1/(Sc*Sl*compliance); // MPa/m
+  const pmax = Tbf/(Sc*Sl); // MPa
+  return {K, pmax};
+}
+function steelSCC(Ro, As_cm2, Es_GPa, sigmaY, Sl){
+  const As = As_cm2*1e-4; // m^2
+  const Es = Es_GPa*1000; // MPa
+  const K = (Es*As)/(Sl*Ro*Ro); // MPa/m
+  const pmax = (sigmaY*As)/(Sl*Ro); // MPa
+  return {K, pmax};
+}
+
+/* =====================================================================
+   5) SVG CHART HELPER
+===================================================================== */
+function svgLineChart(containerEl, opts){
+  const {series, xLabel, yLabel, width=620, height=340, markers=[], xMin, xMax, yMin, yMax} = opts;
+  const padL=58, padR=18, padT=16, padB=42;
+  const plotW = width-padL-padR, plotH = height-padT-padB;
+
+  let allX=[], allY=[];
+  series.forEach(s=>s.points.forEach(p=>{allX.push(p.x); allY.push(p.y);}));
+  markers.forEach(m=>{allX.push(m.x); allY.push(m.y);});
+  let xmn = xMin!==undefined?xMin:Math.min(...allX);
+  let xmx = xMax!==undefined?xMax:Math.max(...allX);
+  let ymn = yMin!==undefined?yMin:Math.min(0,Math.min(...allY));
+  let ymx = yMax!==undefined?yMax:Math.max(...allY);
+  if(xmx===xmn) xmx=xmn+1;
+  if(ymx===ymn) ymx=ymn+1;
+  ymx = ymx*1.08;
+
+  const sx = x => padL + (x-xmn)/(xmx-xmn)*plotW;
+  const sy = y => padT + plotH - (y-ymn)/(ymx-ymn)*plotH;
+
+  let svg = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" font-family="Roboto Mono, monospace">`;
+  svg += `<rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="#F0F4F7" stroke="none"/>`;
+
+  // gridlines
+  const nGridX=6, nGridY=5;
+  for(let i=0;i<=nGridX;i++){
+    const xv = xmn + i*(xmx-xmn)/nGridX;
+    const xp = sx(xv);
+    svg += `<line x1="${xp}" y1="${padT}" x2="${xp}" y2="${padT+plotH}" stroke="#D7E0E6" stroke-width="1"/>`;
+    svg += `<text x="${xp}" y="${padT+plotH+16}" font-size="10" fill="#4A5560" text-anchor="middle">${xv.toFixed(xmx-xmn<3?2:1)}</text>`;
+  }
+  for(let i=0;i<=nGridY;i++){
+    const yv = ymn + i*(ymx-ymn)/nGridY;
+    const yp = sy(yv);
+    svg += `<line x1="${padL}" y1="${yp}" x2="${padL+plotW}" y2="${yp}" stroke="#D7E0E6" stroke-width="1"/>`;
+    svg += `<text x="${padL-6}" y="${yp+3}" font-size="10" fill="#4A5560" text-anchor="end">${yv.toFixed(2)}</text>`;
+  }
+  // axes
+  svg += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+plotH}" stroke="#1B4F72" stroke-width="1.3"/>`;
+  svg += `<line x1="${padL}" y1="${padT+plotH}" x2="${padL+plotW}" y2="${padT+plotH}" stroke="#1B4F72" stroke-width="1.3"/>`;
+
+  // series
+  series.forEach(s=>{
+    const pts = s.points.map(p=>`${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(" ");
+    svg += `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-dasharray="${s.dash||''}"/>`;
+  });
+  // markers
+  markers.forEach(m=>{
+    svg += `<circle cx="${sx(m.x)}" cy="${sy(m.y)}" r="4.5" fill="${m.color||'#B0413E'}" stroke="#fff" stroke-width="1"/>`;
+    if(m.label){
+      svg += `<text x="${sx(m.x)+7}" y="${sy(m.y)-6}" font-size="10.5" fill="${m.color||'#B0413E'}" font-weight="bold">${m.label}</text>`;
+    }
+  });
+  // axis titles
+  svg += `<text x="${padL+plotW/2}" y="${height-6}" font-size="11.5" fill="#33404A" text-anchor="middle">${xLabel}</text>`;
+  svg += `<text x="14" y="${padT+plotH/2}" font-size="11.5" fill="#33404A" text-anchor="middle" transform="rotate(-90 14 ${padT+plotH/2})">${yLabel}</text>`;
+  svg += `</svg>`;
+
+  let legendHtml = "";
+  if(series.length>1){
+    legendHtml = `<div class="legend">${series.map(s=>`<span><i style="background:${s.color}"></i>${s.name}</span>`).join("")}</div>`;
+  }
+  containerEl.innerHTML = legendHtml + svg;
+}
+
+/* Schematic circular tunnel cross-section: excavation boundary + plastic zone
+   ring(s) for the unsupported and (if applicable) supported/equilibrium case,
+   plus an optional bolt-length ring. All radii in metres. */
+function svgTunnelSection(containerEl, opts){
+  const {Ro, RpUnsupported, RpSupported, boltTipRadius, width=460, height=420} = opts;
+  const legendItems = [];
+  const candidates = [Ro, RpUnsupported||Ro, RpSupported||Ro, boltTipRadius||Ro];
+  const maxR = Math.max(...candidates);
+  const pad = 46;
+  const scale = (Math.min(width,height-46)/2 - pad) / maxR;
+  const cx = width/2, cy = (height-46)/2 + 10;
+  const rpx = r => r*scale;
+
+  let svg = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" font-family="Roboto Mono, monospace">`;
+  svg += `<rect x="0" y="0" width="${width}" height="${height}" fill="#F0F4F7"/>`;
+
+  // outermost ring first so smaller circles draw on top
+  if(boltTipRadius && boltTipRadius > Ro*1.001){
+    svg += `<circle cx="${cx}" cy="${cy}" r="${rpx(boltTipRadius)}" fill="none" stroke="#6b7480" stroke-width="1.3" stroke-dasharray="2,3"/>`;
+    legendItems.push({color:'#6b7480', dash:true, label:`Bolt tip radius (R₀+L_b) = ${boltTipRadius.toFixed(2)} m`});
+  }
+  if(RpUnsupported && RpUnsupported > Ro*1.001){
+    svg += `<circle cx="${cx}" cy="${cy}" r="${rpx(RpUnsupported)}" fill="none" stroke="#D68910" stroke-width="1.8" stroke-dasharray="6,4"/>`;
+    legendItems.push({color:'#D68910', dash:true, label:`Plastic zone, unsupported, R_p = ${RpUnsupported.toFixed(2)} m (R_p/R₀ = ${(RpUnsupported/Ro).toFixed(2)})`});
+  }
+  if(RpSupported && RpSupported > Ro*1.001){
+    svg += `<circle cx="${cx}" cy="${cy}" r="${rpx(RpSupported)}" fill="none" stroke="#3F7D5C" stroke-width="1.8" stroke-dasharray="6,4"/>`;
+    legendItems.push({color:'#3F7D5C', dash:true, label:`Plastic zone, supported (at equilibrium), R_p = ${RpSupported.toFixed(2)} m (R_p/R₀ = ${(RpSupported/Ro).toFixed(2)})`});
+  } else if(RpSupported){
+    legendItems.push({color:'#3F7D5C', dash:false, label:`Supported case: fully elastic (no plastic zone forms)`});
+  }
+  // excavation boundary (filled void)
+  svg += `<circle cx="${cx}" cy="${cy}" r="${rpx(Ro)}" fill="#FAF8F5" stroke="#1B4F72" stroke-width="2.2"/>`;
+  legendItems.unshift({color:'#1B4F72', dash:false, label:`Excavation boundary, R₀ = ${Ro.toFixed(2)} m`});
+  // center mark
+  svg += `<line x1="${cx-5}" y1="${cy}" x2="${cx+5}" y2="${cy}" stroke="#1B4F72" stroke-width="1"/>`;
+  svg += `<line x1="${cx}" y1="${cy-5}" x2="${cx}" y2="${cy+5}" stroke="#1B4F72" stroke-width="1"/>`;
+
+  // scale bar
+  const niceSteps = [0.5,1,2,5,10,20,50,100,200];
+  let barLen = niceSteps.find(s=>s >= maxR/4) || niceSteps[niceSteps.length-1];
+  const barPx = rpx(barLen);
+  const bx = 18, by = height-14;
+  svg += `<line x1="${bx}" y1="${by}" x2="${bx+barPx}" y2="${by}" stroke="#33404A" stroke-width="1.5"/>`;
+  svg += `<line x1="${bx}" y1="${by-4}" x2="${bx}" y2="${by+4}" stroke="#33404A" stroke-width="1.5"/>`;
+  svg += `<line x1="${bx+barPx}" y1="${by-4}" x2="${bx+barPx}" y2="${by+4}" stroke="#33404A" stroke-width="1.5"/>`;
+  svg += `<text x="${bx}" y="${by-7}" font-size="10.5" fill="#33404A">${barLen} m</text>`;
+  svg += `</svg>`;
+
+  const legendHtml = `<div class="legend" style="flex-direction:column; gap:5px; align-items:flex-start;">${legendItems.map(li=>
+    `<span><i style="background:${li.color}; ${li.dash?'background-image:linear-gradient(90deg, '+li.color+' 60%, transparent 60%); background-size:8px 3px;':''}"></i>${li.label}</span>`
+  ).join("")}</div>`;
+
+  containerEl.innerHTML = svg + legendHtml;
+}
+
+/* =====================================================================
+   MAIN CALCULATION
+===================================================================== */
+function runCalculation(){
+  // ---- read geometry / stress ----
+  const Ro = parseFloat($('ro').value);
+  const depthH = parseFloat($('depthH').value);
+  const gammaRock = parseFloat($('gammaRock').value);
+  const p0 = parseFloat($('p0').value);
+  const E = parseFloat($('Emod').value);
+  const nu = parseFloat($('nu').value);
+  const psi = parseFloat($('psi').value);
+
+  const grcMethod = document.querySelector('input[name=grcMethod]:checked').value;
+
+  let c_use, phi_use, hbInfo=null;
+  if(grcMethod==='mc'){
+    c_use = parseFloat($('cCoh').value);
+    phi_use = Math.max(parseFloat($('phiFric').value), 0.5);
+  } else {
+    const sigci = parseFloat($('sigci').value);
+    const GSI = parseFloat($('gsi').value);
+    const mi = parseFloat($('mi').value);
+    const D = parseFloat($('dfac').value);
+    const ovrRaw = $('sig3maxOverride').value;
+    const ovr = ovrRaw==="" ? null : parseFloat(ovrRaw);
+    hbInfo = computeHBParams(sigci, GSI, mi, D, p0, gammaRock, depthH, ovr);
+    c_use = hbInfo.c_eq;
+    phi_use = Math.max(hbInfo.phi_deg, 0.5);
+  }
+
+  // ---- GRC ----
+  const grc = computeGRC_MC(p0, Ro, E, nu, c_use, phi_use, psi, 400);
+  const ptsAscByU = grc.pts.slice().sort((a,b)=>a.u-b.u);
+  const uMax = ptsAscByU[ptsAscByU.length-1].u;
+  function GRC_p_at_u(u){
+    if(u<=0) return p0;
+    if(u>=uMax) return 0;
+    const lookup = ptsAscByU.map(pt=>({x:pt.u, y:pt.p}));
+    return interpY(lookup, u);
+  }
+
+  // ---- LDP ----
+  const ldpMethod = document.querySelector('input[name=ldpMethod]:checked').value;
+  const RpMax = Math.max(grc.RpMax, Ro*1.0000001);
+  const xInstall = parseFloat($('xInstall').value);
+  function ldpFrac(X){
+    return ldpMethod==='vd' ? ldpFraction_VD(X, Ro, RpMax) : ldpFraction_Panet(X, Ro);
+  }
+  const uInstallFrac = clamp(ldpFrac(xInstall), 0, 0.999999);
+  const u_so = uInstallFrac * uMax;
+
+  // ---- ground relaxation / stress reduction factor λ ----
+  // λ reflects the ground's state at the point of support installation (u0, from the LDP) —
+  // it is the fictitious pressure fraction released in FEM Stage 1, BEFORE support is active.
+  // It must not be tied to the equilibrium pressure, which is an outcome of Stage 2, not an input to it.
+  const pi0 = GRC_p_at_u(u_so);                  // fictitious internal pressure on the GRC at u = u_so
+  const lambda = p0 > 0 ? clamp(1 - pi0/p0, 0, 1) : 0;
+  const installedOnElasticBranch = pi0 >= grc.pcr - 1e-9;   // was support installed before wall-yield began?
+
+  // ---- support elements ----
+  const enShot = $('enShotcrete').checked;
+  const enBolts = $('enBolts').checked;
+  const enSteel = $('enSteel').checked;
+
+  const supportEls = [];
+  if(enShot){
+    const r = shotcreteSCC(Ro, parseFloat($('tc').value), parseFloat($('Ec').value), parseFloat($('nuC').value), parseFloat($('sigmaCC').value));
+    supportEls.push({name:'Shotcrete lining', ...r});
+  }
+  if(enBolts){
+    const r = boltsSCC(Ro, parseFloat($('boltDia').value), parseFloat($('Eb').value), parseFloat($('Lb').value), parseFloat($('Sc').value), parseFloat($('SlBolt').value), parseFloat($('Tbf').value), parseFloat($('Qconst').value));
+    supportEls.push({name:'Rockbolts', ...r});
+  }
+  if(enSteel){
+    const r = steelSCC(Ro, parseFloat($('Asteel').value), parseFloat($('Esteel').value), parseFloat($('sigmaYSteel').value), parseFloat($('SlSteel').value));
+    supportEls.push({name:'Steel sets', ...r});
+  }
+
+  function elementPressure(el, us){
+    return Math.min(el.K*us, el.pmax);
+  }
+  function SCC_p_total(us){
+    if(us<=0) return 0;
+    return supportEls.reduce((sum,el)=>sum+elementPressure(el,us),0);
+  }
+  const pmaxTotal = supportEls.reduce((s,el)=>s+el.pmax,0);
+
+  // ---- equilibrium ----
+  let eqU=null, eqP=null, noSupport = supportEls.length===0;
+  if(!noSupport && u_so < uMax){
+    let lo=u_so, hi=u_so + Math.max(uMax*3, uMax-u_so+0.01)+ (uMax*5+0.05);
+    // ensure hi large enough that SCC has reached pmaxTotal or exceeded GRC
+    hi = u_so + Math.max((pmaxTotal/(Math.max(...supportEls.map(e=>e.K)) || 1))*1.5, uMax*4, 0.5);
+    function g(u){ return GRC_p_at_u(u) - SCC_p_total(u-u_so); }
+    let glo=g(lo), ghi=g(hi);
+    // if still positive at hi (support demand never catches up, i.e. GRC still above SCC even after huge displacement) -> inadequate support
+    if(glo<=0){
+      eqU=lo; eqP=GRC_p_at_u(lo);
+    } else if(ghi>0){
+      // no crossing found in range: support inadequate (GRC never drops to support capacity within reasonable closure)
+      eqU=null; eqP=null;
+    } else {
+      for(let it=0; it<80; it++){
+        const mid=(lo+hi)/2;
+        const gm=g(mid);
+        if(Math.abs(gm)<1e-6){lo=hi=mid; break;}
+        if((gm>0 && glo>0)||(gm<0&&glo<0)){lo=mid; glo=gm;} else {hi=mid;}
+      }
+      eqU=(lo+hi)/2;
+      eqP=GRC_p_at_u(eqU);
+    }
+  } else if(!noSupport && u_so>=uMax){
+    eqU=uMax; eqP=0;
+  }
+
+  // ---- plastic radius for the tunnel cross-section diagram ----
+  const RpUnsupported = grc.RpMax; // long-term, pi=0 (no support) plastic radius
+  let RpSupported = null;
+  if(!noSupport){
+    if(eqP!==null){
+      RpSupported = grc.RpAt(eqP); // plastic radius corresponding to the equilibrium support pressure
+    }
+  }
+  const boltTipRadius = (enBolts && !isNaN(parseFloat($('Lb').value))) ? Ro + parseFloat($('Lb').value) : null;
+
+  renderResults({
+    Ro, p0, E, nu, psi, grcMethod, c_use, phi_use, hbInfo, grc, uMax,
+    ldpMethod, RpMax, xInstall, uInstallFrac, u_so,
+    supportEls, pmaxTotal, SCC_p_total, GRC_p_at_u,
+    eqU, eqP, noSupport, RpUnsupported, RpSupported, boltTipRadius, enBolts,
+    lambda, pi0, installedOnElasticBranch
+  });
+}
+
+/* =====================================================================
+   RENDER
+===================================================================== */
+function fmt(v, d=2){ return (isFinite(v)? v.toFixed(d) : "—"); }
+
+function renderResults(R){
+  // ---------- Summary ----------
+  let summaryHtml = "";
+  if(R.noSupport){
+    summaryHtml = `<p class="placeholder">No support elements enabled — showing unsupported ground response only (equilibrium = long-term GRC at p = 0).</p>`;
+  } else if(R.eqU===null){
+    summaryHtml = `<span class="pill fail">SUPPORT INADEQUATE</span>
+    <p style="font-size:13px; margin-top:8px;">The support system's combined capacity (p<sub>s,max</sub> = ${fmt(R.pmaxTotal)} MPa) is reached before the ground pressure demand from the GRC drops to a matching value within a realistic displacement range. Increase support stiffness/capacity or install earlier.</p>`;
+  } else {
+    const fosGlobal = R.pmaxTotal>0 ? R.pmaxTotal/R.eqP : Infinity;
+    const level = fosGlobal>=1.5 ? 'pass' : (fosGlobal>=1.0 ? 'warn' : 'fail');
+    const levelText = fosGlobal>=1.5 ? 'ADEQUATE' : (fosGlobal>=1.0 ? 'MARGINAL' : 'FAIL');
+    summaryHtml = `<span class="pill ${level}">${levelText}</span>
+    <div class="kv-grid" style="margin-top:10px;">
+      <div class="k">Equilibrium support pressure p<sub>eq</sub></div><div class="v">${fmt(R.eqP)} MPa</div>
+      <div class="k">Equilibrium wall displacement u<sub>eq</sub></div><div class="v">${fmt(R.eqU*1000,1)} mm</div>
+      <div class="k">Displacement before support installed u<sub>0</sub></div><div class="v">${fmt(R.u_so*1000,1)} mm</div>
+      <div class="k">Displacement absorbed by support (u<sub>eq</sub>−u<sub>0</sub>)</div><div class="v">${fmt((R.eqU-R.u_so)*1000,1)} mm</div>
+      <div class="k">Combined support capacity p<sub>s,max</sub></div><div class="v">${fmt(R.pmaxTotal)} MPa</div>
+      <div class="k">Overall Factor of Safety (p<sub>s,max</sub>/p<sub>eq</sub>)</div><div class="v">${fmt(fosGlobal)}</div>
+    </div>`;
+  }
+  $('summaryBox').innerHTML = summaryHtml;
+
+  // ---------- Rock params ----------
+  let rp = `<div class="kv-grid">
+    <div class="k">Method</div><div class="v">${R.grcMethod==='mc'?'Mohr-Coulomb':'Generalized Hoek-Brown'}</div>`;
+  if(R.grcMethod==='hb' && R.hbInfo){
+    rp += `<div class="k">m<sub>b</sub></div><div class="v">${fmt(R.hbInfo.mb,3)}</div>
+    <div class="k">s</div><div class="v">${fmt(R.hbInfo.s,4)}</div>
+    <div class="k">a</div><div class="v">${fmt(R.hbInfo.a,3)}</div>
+    <div class="k">Rock mass global strength σ<sub>cm</sub></div><div class="v">${fmt(R.hbInfo.sigma_cm)} MPa</div>
+    <div class="k">σ₃max used</div><div class="v">${fmt(R.hbInfo.sigma3max)} MPa</div>
+    <div class="k">Equivalent cohesion c′</div><div class="v">${fmt(R.hbInfo.c_eq,3)} MPa</div>
+    <div class="k">Equivalent friction angle φ′</div><div class="v">${fmt(R.hbInfo.phi_deg,1)}°</div>`;
+  } else {
+    rp += `<div class="k">Cohesion c</div><div class="v">${fmt(R.c_use,3)} MPa</div>
+    <div class="k">Friction angle φ</div><div class="v">${fmt(R.phi_use,1)}°</div>`;
+  }
+  rp += `<div class="k">Rock mass UCS σ<sub>cm</sub> (from c,φ)</div><div class="v">${fmt(R.grc.sigma_cm)} MPa</div>
+    <div class="k">Critical (yield) pressure p<sub>cr</sub></div><div class="v">${fmt(R.grc.pcr)} MPa</div>
+    <div class="k">Max plastic radius R<sub>p</sub> (at p<sub>i</sub>=0)</div><div class="v">${fmt(R.grc.RpMax,2)} m &nbsp;(R<sub>p</sub>/R₀ = ${fmt(R.grc.RpMax/R.Ro,2)})</div>
+    <div class="k">Max unsupported convergence u<sub>max</sub></div><div class="v">${fmt(R.uMax*1000,1)} mm</div>
+    </div>`;
+  $('rockParamsBox').innerHTML = rp;
+
+  // ---------- Tunnel cross-section (plastic zone) diagram ----------
+  svgTunnelSection($('tunnelSectionChart'), {
+    Ro: R.Ro,
+    RpUnsupported: R.RpUnsupported,
+    RpSupported: R.RpSupported,
+    boltTipRadius: R.enBolts ? R.boltTipRadius : null
+  });
+  let tsNote = "";
+  if(R.RpUnsupported <= R.Ro*1.001){
+    tsNote = `<p class="small-note">No plastic zone forms around the excavation, even unsupported — the ground response is fully elastic at the modelled in-situ stress (p₀ = ${fmt(R.p0)} MPa &lt; critical pressure p<sub>cr</sub> = ${fmt(R.grc.pcr)} MPa).</p>`;
+  } else if(R.noSupport){
+    tsNote = `<p class="small-note">No support elements enabled — only the unsupported plastic zone extent is shown.</p>`;
+  } else if(R.eqP===null){
+    tsNote = `<p class="small-note">Equilibrium was not found (support inadequate) — the supported-case plastic zone cannot be evaluated; only the unsupported extent is shown.</p>`;
+  } else if(R.enBolts && R.boltTipRadius && R.RpSupported && R.boltTipRadius < R.RpSupported){
+    tsNote = `<p class="small-note" style="color:#B0413E;">Note: the rockbolt tip radius (R₀+L<sub>b</sub> = ${fmt(R.boltTipRadius,2)} m) falls <strong>inside</strong> the supported-case plastic radius (${fmt(R.RpSupported,2)} m) — the bolts are anchored entirely within yielded rock, so the "suspension" assumption behind the bolt stiffness/capacity used here is not well satisfied (see discussion above). Treat the bolt contribution with caution, or use a longer bolt.</p>`;
+  } else {
+    tsNote = `<p class="small-note">Support is beneficial: the plastic zone radius is reduced from ${fmt(R.RpUnsupported,2)} m (unsupported) to ${fmt(R.RpSupported!==null?R.RpSupported:R.RpUnsupported,2)} m at equilibrium.</p>`;
+  }
+  $('tunnelSectionNote').innerHTML = tsNote;
+
+  // ---------- GRC chart ----------
+  const grcSeries = [{name:'GRC', color:'#1B4F72', points: R.grc.pts.map(pt=>({x:pt.u*1000, y:pt.p}))}];
+  const grcMarkers = [];
+  if(!R.noSupport && R.eqU!==null){
+    grcMarkers.push({x:R.eqU*1000, y:R.eqP, color:'#B0413E', label:'Equilibrium'});
+  }
+  svgLineChart($('grcChart'), {series: grcSeries, xLabel:'Radial displacement, u (mm)', yLabel:'Internal support pressure, pᵢ (MPa)', markers:grcMarkers});
+
+  // ---------- LDP chart ----------
+  const ldpPts = [];
+  const xLo = -3*R.Ro, xHi = 8*R.Ro;
+  for(let i=0;i<=120;i++){
+    const X = xLo + i*(xHi-xLo)/120;
+    const frac = R.ldpMethod==='vd' ? ldpFraction_VD(X,R.Ro,R.RpMax) : ldpFraction_Panet(X,R.Ro);
+    ldpPts.push({x:X/R.Ro, y:clamp(frac,0,1)});
+  }
+  const ldpMarkers = [{x:R.xInstall/R.Ro, y:R.uInstallFrac, color:'#B0413E', label:'Support installed'}];
+  svgLineChart($('ldpChart'), {
+    series:[{name: R.ldpMethod==='vd'?'Vlachopoulos & Diederichs (2009)':'Panet (1995)', color:'#1B4F72', points:ldpPts}],
+    xLabel:'Distance from face / R₀  (X/R₀)', yLabel:'u(X) / u_max', markers: ldpMarkers, yMin:0, yMax:1.02
+  });
+
+  // ---------- Ground relaxation / stress reduction factor λ ----------
+  const yieldNote = R.installedOnElasticBranch
+    ? `installed before wall-yield begins (p<sub>i,0</sub> ≥ p<sub>cr</sub> = ${fmt(R.grc.pcr)} MPa)`
+    : `installed after the wall has already started yielding (p<sub>i,0</sub> &lt; p<sub>cr</sub> = ${fmt(R.grc.pcr)} MPa)`;
+  const lambdaHtml = `<div class="kv-grid">
+    <div class="k">Installation distance from face, X<sub>i</sub></div><div class="v">${fmt(R.xInstall,2)} m</div>
+    <div class="k">Displacement at installation, u₀</div><div class="v">${fmt(R.u_so*1000,1)} mm</div>
+    <div class="k">Fictitious internal pressure at installation, p<sub>i,0</sub></div><div class="v">${fmt(R.pi0)} MPa</div>
+    <div class="k">λ = 1 − p<sub>i,0</sub>/p₀</div><div class="v">${fmt(R.lambda,3)}</div>
+  </div>
+  <p class="small-note" style="margin-top:8px;">Evaluated at the support installation point (from the LDP), not at the final equilibrium — support is ${yieldNote}.</p>`;
+  $('lambdaBox').innerHTML = lambdaHtml;
+
+  // ---------- Interaction chart ----------
+  const interSeries = [{name:'GRC', color:'#1B4F72', points: R.grc.pts.map(pt=>({x:pt.u*1000, y:pt.p}))}];
+  if(!R.noSupport){
+    const sccPts = [];
+    const usMax = Math.max(R.uMax - R.u_so, 0.001)*1.4;
+    for(let i=0;i<=100;i++){
+      const us = i*usMax/100;
+      sccPts.push({x:(R.u_so+us)*1000, y:R.SCC_p_total(us)});
+    }
+    interSeries.push({name:'Combined SCC (shifted by u₀)', color:'#D68910', points: sccPts});
+  }
+  const interMarkers = [];
+  if(!R.noSupport && R.eqU!==null){
+    interMarkers.push({x:R.eqU*1000, y:R.eqP, color:'#B0413E', label:`Equilibrium (${fmt(R.eqP)} MPa)`});
+  }
+  svgLineChart($('interactionChart'), {series: interSeries, xLabel:'Radial displacement, u (mm)', yLabel:'Pressure (MPa)', markers: interMarkers});
+
+  if(!R.noSupport){
+    let eqHtml = "";
+    if(R.eqU===null){
+      eqHtml = `<p class="small-note" style="margin-top:8px;">No equilibrium found within the modelled displacement range — see Summary above.</p>`;
+    } else {
+      eqHtml = `<p class="small-note" style="margin-top:8px;">The equilibrium point is where the shifted SCC (support only begins carrying load once installed at u₀ = ${fmt(R.u_so*1000,1)} mm) intersects the GRC.</p>`;
+    }
+    $('equilibriumBox').innerHTML = eqHtml;
+  } else {
+    $('equilibriumBox').innerHTML = "";
+  }
+
+  // ---------- Support table ----------
+  if(R.supportEls.length===0){
+    $('supportTableBox').innerHTML = `<p class="placeholder">No support elements enabled.</p>`;
+  } else {
+    let rows = "";
+    const usEq = (R.eqU!==null) ? Math.max(R.eqU-R.u_so,0) : null;
+    R.supportEls.forEach(el=>{
+      const pAtEq = usEq!==null ? Math.min(el.K*usEq, el.pmax) : null;
+      const fos = (pAtEq!==null && pAtEq>0) ? el.pmax/pAtEq : (pAtEq===0?Infinity:null);
+      const status = pAtEq===null ? '—' : (fos>=1.5?'<span class="pill pass">OK</span>':(fos>=1.0?'<span class="pill warn">MARGINAL</span>':'<span class="pill fail">EXCEEDED</span>'));
+      rows += `<tr>
+        <td>${el.name}</td>
+        <td class="num">${fmt(el.K,1)}</td>
+        <td class="num">${fmt(el.pmax,3)}</td>
+        <td class="num">${pAtEq!==null?fmt(pAtEq,3):'—'}</td>
+        <td class="num">${fos!==null && isFinite(fos)?fmt(fos,2):(fos===Infinity?'∞':'—')}</td>
+        <td>${status}</td>
+      </tr>`;
+    });
+    $('supportTableBox').innerHTML = `<table class="resulttable">
+      <thead><tr><th>Element</th><th class="num">Stiffness K (MPa/m)</th><th class="num">p<sub>max</sub> (MPa)</th><th class="num">p at equilibrium (MPa)</th><th class="num">FOS</th><th>Status</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="note-box">Individual-element FOS is pressure-based (capacity / mobilised pressure at the equilibrium point), assuming all elements act in parallel at equal radial displacement. This is a preliminary check only — ductility, sequencing, and long-term/creep effects are not captured.</div>`;
+  }
+}
+
+/* =====================================================================
+   UI WIRING
+===================================================================== */
+document.querySelectorAll('input[name=grcMethod]').forEach(r=>{
+  r.addEventListener('change', ()=>{
+    const isMC = document.querySelector('input[name=grcMethod]:checked').value==='mc';
+    $('mcFields').style.display = isMC ? 'block':'none';
+    $('hbFields').style.display = isMC ? 'none':'block';
+  });
+});
+function wireEnableToggle(chkId, fieldsId){
+  const chk = $(chkId), fld = $(fieldsId);
+  function sync(){ fld.classList.toggle('disabled', !chk.checked); }
+  chk.addEventListener('change', sync);
+  sync();
+}
+wireEnableToggle('enShotcrete','shotFields');
+wireEnableToggle('enBolts','boltFields');
+wireEnableToggle('enSteel','steelFields');
+
+$('estP0Btn').addEventListener('click', ()=>{
+  const gamma = parseFloat($('gammaRock').value);
+  const H = parseFloat($('depthH').value);
+  if(!isNaN(gamma) && !isNaN(H)){
+    $('p0').value = (gamma*H).toFixed(2);
+  }
+});
+
+$('calcBtn').addEventListener('click', runCalculation);
+
+// run once on load with defaults
+runCalculation();
+</script>
+</body>
+</html>
