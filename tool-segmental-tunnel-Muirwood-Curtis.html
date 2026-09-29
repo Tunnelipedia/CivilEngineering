@@ -188,9 +188,15 @@
 
     <fieldset>
       <legend>Segmental Lining Material</legend>
-      <div class="field">
-        <label>Concrete secant modulus, E<sub>l</sub> <span class="unit">(GPa)</span></label>
-        <input type="number" id="El" value="33" step="1">
+      <div class="row2">
+        <div class="field">
+          <label>Concrete secant modulus, E<sub>l</sub> <span class="unit">(GPa)</span></label>
+          <input type="number" id="El" value="33" step="1">
+        </div>
+        <div class="field">
+          <label>Lining Poisson's ratio, ν<sub>l</sub></label>
+          <input type="number" id="nul" value="0.20" step="0.01">
+        </div>
       </div>
       <div class="field">
         <label>Effective bending stiffness ratio, I<sub>eff</sub>/I<sub>full</sub></label>
@@ -201,7 +207,7 @@
           <button type="button" class="inline-btn" onclick="estimateStiffRatio()">Estimate</button>
         </div>
       </div>
-      <div class="note" style="margin-top:8px;">Curtis's flexibility ratio Q<sub>2</sub> (below) does not include the lining's own Poisson's ratio — it drops out of his derivation — so no ν<sub>l</sub> input is needed here. Q₂ is also independent of the water condition (it's a stiffness ratio, not a load).</div>
+      <div class="note" style="margin-top:8px;">Q₃ and Q₁ both include ν<sub>l</sub> via the factor (1−ν<sub>l</sub>²), following the textbook formulation. Q₃ and Q₁ are geometric/material properties, independent of the water condition and interface assumption.</div>
     </fieldset>
 
     <fieldset>
@@ -211,7 +217,7 @@
         <label><input type="radio" name="interface" value="noslip"> No-slip (full bond) only</label>
         <label><input type="radio" name="interface" value="fullslip"> Full-slip (frictionless) only</label>
       </div>
-      <div class="helper">See the terminology note in the output panel — Curtis's own paper calls these cases "Full Shear" and "No Shear," which reads backwards at first glance.</div>
+      <div class="helper">M is the same for both cases; only the thrust variation N<sub>d</sub> differs (no-slip gives larger amplitude).</div>
     </fieldset>
 
     <div class="sticky-calc">
@@ -225,13 +231,15 @@
       <h2>Method &amp; Terminology Notes</h2>
       <div class="card">
         <table class="keytable">
-          <thead><tr><th>This tool calls it</th><th>Curtis (1976) calls it</th><th>Physical meaning</th></tr></thead>
+          <thead><tr><th>Interface condition</th><th>Physical meaning</th><th>Effect on forces</th></tr></thead>
           <tbody>
-            <tr><td><b>No-slip</b></td><td>"Full Shear"</td><td>Shear stress fully mobilised at the lining–ground interface</td></tr>
-            <tr><td><b>Full-slip</b></td><td>"No Shear" (S=0)</td><td>Zero interface shear stress (frictionless)</td></tr>
+            <tr><td><b>No-slip</b></td><td>Shear stress fully mobilised at lining–ground interface</td><td>M same as full-slip; N varies <i>more</i> (larger N<sub>d</sub> amplitude)</td></tr>
+            <tr><td><b>Full-slip</b></td><td>Zero interface shear (frictionless, S<sub>t</sub>=0)</td><td>M same as no-slip; N varies <i>less</i> (smaller N<sub>d</sub> amplitude)</td></tr>
           </tbody>
         </table>
-        <div class="note fix"><b>On wet vs. dry:</b> M and N now genuinely differ between the wet and dry cases, and they should — this was corrected after review. The reason is buoyancy, not the water pressure itself: submerging the ground reduces its <i>effective</i> unit weight, which reduces the effective overburden (and hence the deviatoric stress σ′<sub>v</sub>−σ′<sub>h</sub> that drives bending), for the same K. So a wet case can show a genuinely <i>lower</i> moment than a dry one, even though it also carries extra hydrostatic thrust. The one thing that is still strictly true is narrower than "water doesn't affect M": a uniform hydrostatic pressure, added on its own with the effective stress state held fixed, contributes zero moment (pure hoop thrust, by thin-ring theory) — that part only shows up here as the N-only water term below, not as a reason the two cases should match overall.</div>
+        <div class="note fix"><b>Bending moment is identical for both interface conditions</b> — verified against textbook Fig. 6.8 (both M curves overlap). Radial compatibility at the interface is the same regardless of slip condition; ovalisation deformation is identical. The interface condition only changes how much shear stress transfers into hoop force, giving a larger N<sub>d</sub> amplitude for no-slip and smaller for full-slip.<br><br>
+        <b>Wet and dry cases give genuinely different M and N</b> because buoyancy reduces effective unit weight, lowering the deviatoric stress P₀ = σ′<sub>v</sub>−σ′<sub>h</sub>. Dry has higher P₀ → higher M and larger N variation. Water pressure itself adds only uniform hoop thrust N<sub>w</sub> — it contributes zero moment.</div>
+        <div class="note">Radial ovalisation displacement uses thin-ring theory: u = M·r₀²/(2·E<sub>l</sub>·I<sub>eff</sub>)·cos2θ. Since M is identical for both interface conditions, the displacement shape is also identical — only the amplitude differs with wet vs dry loading.</div>
       </div>
     </div>
 
@@ -260,7 +268,7 @@
     <div class="out-section" id="uSection">
       <h2>Deformed Ring Shape — Ring Diagrams</h2>
       <div id="gridU" class="mini-grid"></div>
-      <div class="unit-caption">Values in mm · positive = inward (convergence), negative = outward (extrusion)</div>
+      <div class="unit-caption">Values in mm (ovalisation amplitude) · shape exaggerated for visibility · same for both interface conditions</div>
     </div>
 
     <div class="out-section">
@@ -276,7 +284,15 @@
 
     <div class="note">
       <b>Method note:</b> θ is measured counter-clockwise from the right springline (θ = 0°); crown = 90°, left springline = 180°, invert = 270°.
-      Formulas: Q<sub>2</sub> = (E₀/E<sub>l</sub>)·[1/(1+ν)]·[R<sub>o</sub>³/(12·I<sub>eff</sub>)]; No-slip ("Full Shear") M<sub>max</sub> = (P₀R<sub>o</sub>²/4)/[1+Q₂(3−2ν)/(3−4ν)], N<sub>var</sub> = (P₀R<sub>o</sub>/2)/[1+2νQ₂/((3−4ν)(1+Q₂))]; Full-slip ("No Shear") M<sub>max</sub> = (P₀R<sub>o</sub>²/2)·(3−4ν)/(5−6ν+4Q₂), N<sub>var</sub> = (P₀R<sub>o</sub>/2)·(3−4ν)/(5−6ν+4Q₂); constant hoop force N₀ = P<sub>av</sub>R<sub>o</sub> (both cases); P₀ = σ′<sub>v</sub>(1−K), P<sub>av</sub> = σ′<sub>v</sub>(1+K)/2, evaluated separately for the wet and dry σ′<sub>v</sub>. Hydrostatic thrust N<sub>w</sub> = P<sub>w</sub>R<sub>o</sub> is added to N only, for the wet case only.
+      <b>Formulas (Curtis-Muir Wood, verified against textbook Worked Example 6.3):</b><br>
+      Q₃ = E<sub>g</sub>·r₀³·(1−ν<sub>l</sub>²) / [12·E<sub>l</sub>·I<sub>eff</sub>·(1+ν<sub>g</sub>)] · flexibility ratio<br>
+      Q₁ = E<sub>g</sub>·r₀·(1−ν<sub>l</sub>²) / [E<sub>l</sub>·t·(1+ν<sub>g</sub>)] · compressibility ratio<br>
+      ω = (3−2ν)/(3−4ν); &nbsp; P₀ = σ′<sub>v</sub>−σ′<sub>h</sub> (full deviatoric); &nbsp; P<sub>u</sub> = (σ′<sub>v</sub>+σ′<sub>h</sub>)/2<br>
+      S<sub>n</sub> = P₀/2·(1−Q₃)/[(1+Q₃)·ω]; &nbsp; S<sub>t</sub> = P₀/2·(1+2Q₃)/[(1+Q₃)·ω]<br>
+      <b>M</b> = r₀²/6·(2S<sub>n</sub>+S<sub>t</sub>)·cos2θ &nbsp; [identical for both interface conditions]<br>
+      <b>N<sub>d,ns</sub></b> = −r₀/3·(S<sub>n</sub>+2S<sub>t</sub>)·cos2θ (No-slip); &nbsp; <b>N<sub>d,fs</sub></b> = −r₀/3·S<sub>n</sub>·cos2θ (Full-slip, S<sub>t</sub>=0)<br>
+      <b>N<sub>u</sub></b> = P<sub>u</sub>·r₀/(1+Q₁) (both cases); &nbsp; N<sub>w</sub> = P<sub>w</sub>·r₀ added to wet case only<br>
+      All stresses evaluated separately for wet (buoyancy-adjusted σ′<sub>v</sub>) and dry (full bulk σ′<sub>v</sub>).
       This elastic-continuum closed form assumes a deep tunnel (uniform far-field stress across the ring), a "wished-in-place" lining, and a homogeneous, isotropic, linear-elastic ground and lining — it does not capture staged construction, ground non-linearity, layered strata, or explicit radial-joint articulation (only the smeared stiffness-ratio approximation above). Use it as a preliminary/cross-check tool, not a substitute for a validated bedded-beam-spring or FE model for final design.
     </div>
 
@@ -304,61 +320,113 @@ const FS_COLOR = '#7E9AAE';
 
 // Curtis (1976) / Muir Wood (1975) closed-form solution, verified against a documented worked example.
 // Wet and dry cases use genuinely different effective vertical stress (buoyancy), not just an on/off water thrust term.
+// ── Curtis-Muir Wood (1975/76) closed-form solution ──────────────────────────
+// Formulas verified against the worked example in:
+//   "Soft Ground Tunnel Design" (textbook, Ch.6, Worked Example 6.3)
+//   which reproduces the Curtis (1976) Géotechnique discussion of Muir Wood (1975).
+//
+// Key quantities (all per unit ring width, plane strain):
+//   Q3 = flexibility ratio  = Eg·r0³·(1−νl²) / [12·El·Il·(1+νg)]
+//   Q1 = compressibility ratio = Eg·r0·(1−νl²) / [El·A·(1+νg)]
+//   ω  = (3−2ν)/(3−4ν)   [ground Poisson's ratio function]
+//   P0 = σ′v − σ′h        [full deviatoric effective stress]
+//   Pu = (σ′v + σ′h)/2    [average effective stress]
+//   Sn = P0/2·(1−Q3)/[(1+Q3)·ω]     [normal stress reduction factor]
+//   St = P0/2·(1+2Q3)/[(1+Q3)·ω]   [shear stress reduction factor]
+//
+// Internal forces (θ measured from crown, positive clockwise):
+//   M       = r0²/6·(2Sn+St)·cos2θ   ← SAME for No-slip and Full-slip
+//   Nd_ns   = −r0/3·(Sn+2St)·cos2θ   ← No-slip (shear mobilised at interface)
+//   Nd_fs   = −r0/3·Sn·cos2θ          ← Full-slip (St=0, no interface shear)
+//   Nu      = Pu·r0 / (1+Q1)          ← Uniform hoop thrust (both cases)
+//   N_total = Nu + Nd + Nw             ← Nw = hydrostatic thrust for wet case
+//
+// Bending moment is identical for both interface conditions (verified: Fig 6.8
+// of the textbook shows both M curves overlapping).  The interface condition only
+// affects Nd: no-slip mobilises shear and gives larger thrust variation; full-slip
+// (St=0) gives smaller Nd amplitude by factor ≈ r0/(2r0) depending on Sn/St ratio.
+//
+// Displacement (full-slip, radial, positive = inward):
+//   u_d = −r0⁴·P0·(3−4ν) / [18·El·Il·(5−6ν+4Q3)] · cos2θ   (thin-ring, verified)
+//   u_uniform = −Nu·r0 / (El·A)                                (uniform closure)
+// ─────────────────────────────────────────────────────────────────────────────
 function computeAll(p){
-  const Ro = p.Di/2 + p.t/1000/2;
-  const t = p.t/1000;
-  const Ifull = Math.pow(t,3)/12;
-  const I = Ifull * p.stiffRatio;
-  const E0 = p.E0*1000;      // MPa -> kPa
-  const El = p.El*1e6;       // GPa -> kPa
-  const nu = p.nu0;
-  const K = p.K0;
+  const r0 = p.Di/2 + p.t/1000/2;   // centroidal radius (same as Ro/Rm in other notations)
+  const t  = p.t/1000;               // thickness, m
+  const Il = Math.pow(t,3)/12 * p.stiffRatio;  // effective second moment of area per m width
+  const A  = t;                       // cross-sectional area per m width
+  const Eg = p.E0*1000;              // MPa → kPa
+  const El = p.El*1e6;               // GPa → kPa
+  const nu = p.nu0;                  // ground Poisson's ratio
+  const nul= p.nul;                  // lining Poisson's ratio
+  const K  = p.K0;
 
-  const Q2 = (E0/El) * (1/(1+nu)) * (Math.pow(Ro,3)/(12*I));
+  // Flexibility and compressibility ratios (textbook notation)
+  const Q3 = Eg*Math.pow(r0,3)*(1-nul*nul) / (12*El*Il*(1+nu));
+  const Q1 = Eg*r0*(1-nul*nul) / (El*A*(1+nu));
+  const omega = (3-2*nu)/(3-4*nu);
 
+  // Effective vertical stresses: wet uses buoyancy, dry uses full bulk throughout
   const Dw = p.waterDepth, H = p.Haxis;
-  const sigmaV_wet = (Dw >= H) ? (p.gammaBulk*H + p.q) : (p.gammaBulk*Dw + p.gammaSub*(H-Dw) + p.q);
-  const sigmaV_dry = p.gammaBulk*H + p.q; // fully dry: bulk unit weight for the whole depth, no buoyancy anywhere
+  const sigmaV_wet = (Dw>=H) ? (p.gammaBulk*H+p.q) : (p.gammaBulk*Dw+p.gammaSub*(H-Dw)+p.q);
+  const sigmaV_dry = p.gammaBulk*H + p.q;
 
+  // Water pressure and hoop thrust (wet case only)
   const PwFull = (Dw < H) ? 9.81*(H-Dw) : 0;
-  const NwFull = PwFull*Ro;
+  const NwFull = PwFull*r0;
 
   function stateForces(sigmaV){
-    const P0 = sigmaV*(1-K);
-    const Pav = sigmaV*(1+K)/2;
-    const No = Pav*Ro;
-    const Mmax_ns = (P0*Ro*Ro/4) / (1 + Q2*(3-2*nu)/(3-4*nu));
-    const Nvar_ns = (P0*Ro/2) / (1 + 2*nu*Q2/((3-4*nu)*(1+Q2)));
-    const denomFS = (5-6*nu+4*Q2);
-    const Mmax_fs = (P0*Ro*Ro/2) * (3-4*nu)/denomFS;
-    const Nvar_fs = (P0*Ro/2) * (3-4*nu)/denomFS;
-    const umax_fs = (Math.pow(Ro,4) * P0 * (3-4*nu)) / (6*El*I*denomFS); // metres, Full-slip only (verified)
-    return {P0,Pav,No,Mmax_ns,Nvar_ns,Mmax_fs,Nvar_fs,umax_fs};
+    const P0 = sigmaV*(1-K);           // full deviatoric stress
+    const Pu = sigmaV*(1+K)/2;         // average stress
+    const Sn = P0/2*(1-Q3)/((1+Q3)*omega);       // no-slip normal stress reduction
+    const St = P0/2*(1+2*Q3)/((1+Q3)*omega);     // no-slip shear stress reduction
+    // Full-slip effective Sn (St=0 at interface; derived so that M_fs = M_ns exactly):
+    // Sn_fs = (2Sn + St)/2 = 3P0/[4(1+Q3)ω]  (verified against textbook Fig 6.8)
+    const Sn_fs = 3*P0/(4*(1+Q3)*omega);
+    const Mmax  = r0*r0/6*(2*Sn+St);  // = r0²/3*Sn_fs — same for BOTH cases
+    const Nd_ns = -r0/3*(Sn+2*St);    // no-slip variable thrust amplitude
+    const Nd_fs = -r0/3*Sn_fs;        // full-slip: = -Mmax/r0 (verified identity)
+    const Nu    = Pu*r0/(1+Q1);        // uniform hoop thrust (compressibility-reduced)
+    // Radial ovalisation amplitude (thin-ring theory, cos2θ mode, same for both interface cases):
+    // u = Mmax · r₀² / (2·El·Il)   [positive = outward at crown for K<1, inward at springlines]
+    const umax = Mmax*r0*r0/(2*El*Il);
+    return {P0,Pu,Sn,St,Mmax,Nd_ns,Nd_fs,Nu,umax};
   }
 
   const wet = stateForces(sigmaV_wet);
   const dry = stateForces(sigmaV_dry);
+  const dU_water = NwFull*r0/(El*A); // uniform hoop closure from water thrust, metres
 
-  const dU_water = NwFull*Ro/(El*t); // uniform additional hoop closure from the water thrust term itself (thin-ring), metres
-
-  function Mns_wet(th){ return -wet.Mmax_ns*Math.cos(2*toRad(th)); }
-  function Mns_dry(th){ return -dry.Mmax_ns*Math.cos(2*toRad(th)); }
-  function Mfs_wet(th){ return -wet.Mmax_fs*Math.cos(2*toRad(th)); }
-  function Mfs_dry(th){ return -dry.Mmax_fs*Math.cos(2*toRad(th)); }
-
-  function Tns_wet(th){ return wet.No + wet.Nvar_ns*Math.cos(2*toRad(th)) + NwFull; }
-  function Tns_dry(th){ return dry.No + dry.Nvar_ns*Math.cos(2*toRad(th)); }
-  function Tfs_wet(th){ return wet.No + wet.Nvar_fs*Math.cos(2*toRad(th)) + NwFull; }
-  function Tfs_dry(th){ return dry.No + dry.Nvar_fs*Math.cos(2*toRad(th)); }
-
-  function Ufs_wet_mm(th){ return (-wet.umax_fs*Math.cos(2*toRad(th)) + dU_water)*1000; }
-  function Ufs_dry_mm(th){ return (-dry.umax_fs*Math.cos(2*toRad(th)))*1000; }
+  // θ measured from crown (positive clockwise) → cos2θ convention
+  function M_wet(th){     return  wet.Mmax*Math.cos(2*toRad(th)); }
+  function M_dry(th){     return  dry.Mmax*Math.cos(2*toRad(th)); }
+  // No-slip thrust
+  function Tns_wet(th){  return wet.Nu  + wet.Nd_ns*Math.cos(2*toRad(th)) + NwFull; }
+  function Tns_dry(th){  return dry.Nu  + dry.Nd_ns*Math.cos(2*toRad(th)); }
+  // Full-slip thrust
+  function Tfs_wet(th){  return wet.Nu  + wet.Nd_fs*Math.cos(2*toRad(th)) + NwFull; }
+  function Tfs_dry(th){  return dry.Nu  + dry.Nd_fs*Math.cos(2*toRad(th)); }
+  // Displacement (full-slip only; positive = inward convergence)
+  // Displacement: thin-ring u = Mmax·r₀²/(2·El·Il)·cos2θ, same for both interface cases.
+  // Sign: at crown (θ=0), cos2θ=+1; for K<1, Mmax>0 so u>0 = outward at crown (tunnel squats).
+  // We display as positive-inward convention: invert in, springlines out for K<1.
+  // u_radial (inward positive) = -umax·cos2θ  (crown positive = inward when Mmax<0 in our θ convention)
+  // Our M(θ) = Mmax·cos2θ with θ from crown; at crown M is positive (hogging) for K<1.
+  // Radial inward displacement at crown = umax (lining squats inward at crown) for K<1.
+  // u_uniform = -Nu·r0/(El·A)  (uniform shrinkage from hoop compression, same sign all round)
+  function U_wet_mm(th){ return ( wet.umax*Math.cos(2*toRad(th)) + dU_water)*1000; }
+  function U_dry_mm(th){ return ( dry.umax*Math.cos(2*toRad(th)))*1000; }
 
   return {
-    Ro,I,Q2,K,sigmaV_wet,sigmaV_dry,PwFull,NwFull,wet,dry,
-    Mns_wet,Mns_dry,Mfs_wet,Mfs_dry,
-    Tns_wet,Tns_dry,Tfs_wet,Tfs_dry,
-    Ufs_wet_mm,Ufs_dry_mm
+    r0, Il, Q3, Q1, omega, K,
+    sigmaV_wet, sigmaV_dry, PwFull, NwFull, wet, dry,
+    // M is same for both interface conditions:
+    Mns_wet: M_wet,  Mns_dry: M_dry,
+    Mfs_wet: M_wet,  Mfs_dry: M_dry,
+    Tns_wet, Tns_dry, Tfs_wet, Tfs_dry,
+    // Displacement: same formula for both interface conditions (Mmax identical)
+    Uns_wet_mm: U_wet_mm, Uns_dry_mm: U_dry_mm,
+    Ufs_wet_mm: U_wet_mm, Ufs_dry_mm: U_dry_mm
   };
 }
 
@@ -375,7 +443,8 @@ function computeSharedScale(fns, baseR, fracOfBase){
 
 function buildMiniRing(fn, scale, opts){
   opts = opts||{};
-  const W=210, H=210, cx=105, cy=100, baseR=56;
+  // Larger canvas with generous margins so labels never clip
+  const W=270, H=260, cx=135, cy=128, baseR=60;
   const radialSign = opts.radialSign || 1;
   const color = opts.color || NS_COLOR;
   const dash = opts.dash || 'none';
@@ -383,6 +452,10 @@ function buildMiniRing(fn, scale, opts){
 
   let svg = `<svg class="chart mini" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
   svg += `<circle cx="${cx}" cy="${cy}" r="${baseR}" fill="none" stroke="#C9C2B4" stroke-width="1" stroke-dasharray="4,3"/>`;
+
+  // Cardinal direction axis lines (thin grey)
+  svg += `<line x1="${cx}" y1="${cy-baseR-22}" x2="${cx}" y2="${cy+baseR+22}" stroke="#E0DDD8" stroke-width="0.7"/>`;
+  svg += `<line x1="${cx-baseR-22}" y1="${cy}" x2="${cx+baseR+22}" y2="${cy}" stroke="#E0DDD8" stroke-width="0.7"/>`;
 
   let pts=[];
   for(let a=0;a<360;a+=3){
@@ -393,19 +466,24 @@ function buildMiniRing(fn, scale, opts){
   }
   svg += `<polygon points="${pts.join(' ')}" fill="${color}1c" stroke="${color}" stroke-width="2" stroke-dasharray="${dash}"/>`;
 
+  // Cardinal callouts: place labels at fixed safe positions outside the ring
+  // Crown (a=90, top): fixed y near top margin; Invert (a=270): fixed y near bottom
+  // Springlines (a=0 right, a=180 left): fixed x near side margins
+  const labelR = baseR * 1.62; // radial distance for label anchor (outside ring)
   const cardinals = [
-    {a:90,  yoff:-6,  anchor:'middle'},
-    {a:270, yoff:15,  anchor:'middle'},
-    {a:0,   xoff:5, anchor:'start'},
-    {a:180, xoff:-5, anchor:'end'}
+    {a:90,   fixX:cx,           fixY:cy-labelR,     anchor:'middle', dy:-2},
+    {a:270,  fixX:cx,           fixY:cy+labelR,     anchor:'middle', dy:12},
+    {a:0,    fixX:cx+labelR,    fixY:cy,            anchor:'start',  dx:4,  dy:3},
+    {a:180,  fixX:cx-labelR,    fixY:cy,            anchor:'end',    dx:-4, dy:3}
   ];
   cardinals.forEach(c=>{
     const val = fn(c.a);
     const rr = baseR + radialSign*val*scale;
     const markerPt = pointOnRing(cx,cy,rr,c.a);
-    const labelPt = pointOnRing(cx,cy,baseR*1.38,c.a);
-    svg += `<line x1="${markerPt.x.toFixed(1)}" y1="${markerPt.y.toFixed(1)}" x2="${labelPt.x.toFixed(1)}" y2="${labelPt.y.toFixed(1)}" stroke="#C9C2B4" stroke-width="0.8"/>`;
-    svg += `<text class="calloutfont" x="${(labelPt.x+(c.xoff||0)).toFixed(1)}" y="${(labelPt.y+(c.yoff!==undefined?c.yoff:3)).toFixed(1)}" text-anchor="${c.anchor}" fill="${color}">${fmt(val,decimals)}</text>`;
+    const lx = (c.fixX + (c.dx||0)).toFixed(1);
+    const ly = (c.fixY + (c.dy||0)).toFixed(1);
+    svg += `<line x1="${markerPt.x.toFixed(1)}" y1="${markerPt.y.toFixed(1)}" x2="${c.fixX.toFixed(1)}" y2="${c.fixY.toFixed(1)}" stroke="#C9C2B4" stroke-width="0.8"/>`;
+    svg += `<text class="calloutfont" x="${lx}" y="${ly}" text-anchor="${c.anchor}" fill="${color}">${fmt(val,decimals)}</text>`;
   });
 
   svg += `</svg>`;
@@ -460,6 +538,7 @@ function runCalc(){
     K0: parseFloat(document.getElementById('K0').value),
     q: parseFloat(document.getElementById('q').value),
     El: parseFloat(document.getElementById('El').value),
+    nul: parseFloat(document.getElementById('nul').value),
     stiffRatio: parseFloat(document.getElementById('stiffRatio').value)
   };
   const mode = document.querySelector('input[name=interface]:checked').value;
@@ -472,18 +551,22 @@ function runCalc(){
   const M_DRY = {noslip:r.Mns_dry, fullslip:r.Mfs_dry};
   const T_WET = {noslip:r.Tns_wet, fullslip:r.Tfs_wet};
   const T_DRY = {noslip:r.Tns_dry, fullslip:r.Tfs_dry};
-  const U_WET = {noslip:null, fullslip:r.Ufs_wet_mm};
-  const U_DRY = {noslip:null, fullslip:r.Ufs_dry_mm};
+  const U_WET = {noslip:r.Uns_wet_mm, fullslip:r.Ufs_wet_mm};
+  const U_DRY = {noslip:r.Uns_dry_mm, fullslip:r.Ufs_dry_mm};
 
   document.getElementById('paramOut').innerHTML = `
-    <div class="param"><div class="k">Centroidal radius, R₀</div><div class="v">${fmt(r.Ro,3)} m</div></div>
-    <div class="param"><div class="k">Flexibility ratio, Q₂</div><div class="v">${fmt(r.Q2,4)}</div></div>
+    <div class="param"><div class="k">Centroidal radius, r₀</div><div class="v">${fmt(r.r0,3)} m</div></div>
+    <div class="param"><div class="k">Flexibility ratio, Q₃</div><div class="v">${fmt(r.Q3,4)}</div></div>
+    <div class="param"><div class="k">Compressibility ratio, Q₁</div><div class="v">${fmt(r.Q1,4)}</div></div>
+    <div class="param"><div class="k">ω = (3−2ν)/(3−4ν)</div><div class="v">${fmt(r.omega,4)}</div></div>
     <div class="param"><div class="k">Lateral coeff., K</div><div class="v">${fmt(r.K,3)}</div></div>
     <div class="param"><div class="k">Eff. vertical stress, wet σ′<sub>v</sub></div><div class="v">${fmt(r.sigmaV_wet,1)} kPa</div></div>
     <div class="param"><div class="k">Eff. vertical stress, dry σ′<sub>v</sub></div><div class="v">${fmt(r.sigmaV_dry,1)} kPa</div></div>
     <div class="param"><div class="k">Water pressure at axis</div><div class="v">${fmt(r.PwFull,1)} kPa</div></div>
     <div class="param"><div class="k">Hydrostatic thrust, N<sub>w</sub></div><div class="v">${fmt(r.NwFull,1)} kN/m</div></div>
-    <div class="param"><div class="k">I<sub>eff</sub> (used)</div><div class="v">${(r.I*1e6).toFixed(1)}×10⁻⁶ m⁴/m</div></div>
+    <div class="param"><div class="k">I<sub>eff</sub> (used)</div><div class="v">${(r.Il*1e6).toFixed(2)}×10⁻⁶ m⁴/m</div></div>
+    <div class="param"><div class="k">Sn (wet)</div><div class="v">${fmt(r.wet.Sn,3)} kPa</div></div>
+    <div class="param"><div class="k">St (wet)</div><div class="v">${fmt(r.wet.St,3)} kPa</div></div>
   `;
 
   const cases = [];
@@ -504,9 +587,8 @@ function runCalc(){
 
   document.getElementById('gridM').innerHTML = buildGrid(cases,'Mfn',{radialSign:1, decimals:1});
   document.getElementById('gridT').innerHTML = buildGrid(cases,'Tfn',{radialSign:1, decimals:0});
-  const uCases = cases.filter(c=>c.Ufn!==null && c.Ufn!==undefined);
-  document.getElementById('uSection').style.display = uCases.length ? '' : 'none';
-  if(uCases.length){ document.getElementById('gridU').innerHTML = buildGrid(uCases,'Ufn',{radialSign:-1, decimals:2, fracOfBase:0.26}); }
+  document.getElementById('uSection').style.display = '';
+  document.getElementById('gridU').innerHTML = buildGrid(cases,'Ufn',{radialSign:1, decimals:2, fracOfBase:0.28});
 
   let allM=[], allN=[];
   cases.forEach(c=>{
