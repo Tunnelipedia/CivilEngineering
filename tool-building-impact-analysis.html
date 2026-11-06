@@ -33,43 +33,20 @@
     gap:2px;
     border-bottom:3px solid var(--output-accent);
   }
-  header.toolbar h1{
-    font-size:19px;
-    margin:0;
-    font-weight:600;
-    letter-spacing:.2px;
-  }
-  header.toolbar .code-ref{
-    font-family:'Roboto Mono',monospace;
-    font-size:12.5px;
-    color:#B9C7CE;
-  }
-  header.toolbar .disclaimer{
-    font-size:11.5px;
-    color:#93A3AB;
-    margin-top:6px;
-    max-width:1100px;
-    line-height:1.45;
-  }
-  .layout{
-    display:flex;
-    align-items:flex-start;
-    min-height:calc(100vh - 96px);
-  }
+  header.toolbar h1{font-size:19px;margin:0;font-weight:600;letter-spacing:.2px;}
+  header.toolbar .code-ref{font-family:'Roboto Mono',monospace;font-size:12.5px;color:#B9C7CE;}
+  header.toolbar .disclaimer{font-size:11.5px;color:#93A3AB;margin-top:6px;max-width:1100px;line-height:1.45;}
+
+  .layout{display:flex;align-items:flex-start;min-height:calc(100vh - 110px);}
   .col-input{
     width:44%;
     background:var(--input-bg);
     border-right:2px solid var(--divider);
-    padding:20px 20px 100px 20px;
-    max-height:calc(100vh - 96px);
+    padding:20px 20px 30px 20px;
+    max-height:calc(100vh - 110px);
     overflow-y:auto;
-    position:relative;
   }
-  .col-output{
-    width:56%;
-    background:var(--output-bg);
-    padding:20px 24px 60px 24px;
-  }
+  .col-output{width:56%;background:var(--output-bg);padding:20px 24px 60px 24px;}
   @media (max-width:980px){
     .layout{flex-direction:column;}
     .col-input,.col-output{width:100%;max-height:none;border-right:none;}
@@ -84,180 +61,98 @@
     background:var(--input-bg2);
   }
   legend{
-    font-size:12px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.5px;
-    color:var(--input-accent);
-    padding:0 6px;
+    font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--input-accent);padding:0 6px;
   }
-  label{
-    display:block;
-    font-size:13.5px;
-    font-weight:500;
-    color:#3a3a3a;
-    margin:10px 0 3px 0;
+  label{display:block;font-size:13.5px;font-weight:500;color:#3a3a3a;margin:10px 0 3px 0;}
+  label .unit{font-weight:400;color:#7a7a7a;font-size:12px;}
+  input[type=number], input[type=text], select{
+    width:100%;padding:7px 8px;font-size:14px;font-family:'Roboto Mono',monospace;
+    border:1px solid #C9C2B6;border-radius:3px;background:#fff;color:var(--text-dark);
   }
-  label .unit{
-    font-weight:400;
-    color:#7a7a7a;
-    font-size:12px;
-  }
-  input[type=number], select{
-    width:100%;
-    padding:7px 8px;
-    font-size:14px;
-    font-family:'Roboto Mono',monospace;
-    border:1px solid #C9C2B6;
-    border-radius:3px;
-    background:#fff;
-    color:var(--text-dark);
-  }
-  input[type=number]:focus, select:focus{
-    outline:none;
-    border-color:var(--input-accent);
-    box-shadow:0 0 0 2px rgba(61,90,115,.15);
+  input[type=number]:focus, input[type=text]:focus, select:focus{
+    outline:none;border-color:var(--input-accent);box-shadow:0 0 0 2px rgba(61,90,115,.15);
   }
   .radio-row{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;}
   .radio-row label{
-    display:flex;align-items:center;gap:6px;
-    font-weight:500;font-size:13.5px;margin:0;
-    background:#fff;border:1px solid #C9C2B6;border-radius:3px;
-    padding:6px 10px;cursor:pointer;flex:1;justify-content:center;
+    display:flex;align-items:center;gap:6px;font-weight:500;font-size:13.5px;margin:0;
+    background:#fff;border:1px solid #C9C2B6;border-radius:3px;padding:6px 10px;
+    cursor:pointer;flex:1;justify-content:center;
   }
   .radio-row input{width:auto;margin:0;accent-color:var(--input-accent);}
   .radio-row label.active{border-color:var(--input-accent);background:#EAF0F4;}
-  .hint{
-    font-size:11.5px;
-    color:#8a8a8a;
-    margin-top:4px;
-    line-height:1.4;
-  }
+  .hint{font-size:11.5px;color:#8a8a8a;margin-top:4px;line-height:1.4;}
   .hint b{color:#5c5c5c;}
-  .calc-btn-wrap{
-    position:sticky;
-    bottom:0;
-    background:linear-gradient(to top, var(--input-bg) 70%, rgba(250,248,245,0));
-    padding:14px 0 4px 0;
-    margin-top:8px;
+  .sub-fields{
+    display:none;margin-top:8px;padding:2px 0 8px 12px;border-left:3px solid var(--input-accent);
   }
+  .sub-fields.show{display:block;}
+  .calc-btn-wrap{margin-top:4px;padding:0 0 6px 0;}
   #calcBtn{
-    width:100%;
-    padding:13px;
-    font-size:15px;
-    font-weight:700;
-    letter-spacing:.3px;
-    color:#fff;
-    background:var(--input-accent);
-    border:none;
-    border-radius:4px;
-    cursor:pointer;
+    width:100%;padding:13px;font-size:15px;font-weight:700;letter-spacing:.3px;color:#fff;
+    background:var(--input-accent);border:none;border-radius:4px;cursor:pointer;
     box-shadow:0 2px 6px rgba(61,90,115,.35);
   }
   #calcBtn:hover{background:#324a5f;}
 
-  /* Twin tunnel two-column input grid */
-  .twin-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:0 14px;
-    transition:grid-template-columns .15s;
-  }
-  .twin-grid.single-mode{grid-template-columns:1fr 0fr;}
+  .twin-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+  .twin-grid.single-mode{grid-template-columns:1fr;}
   .twin-grid.single-mode .downline-col{display:none;}
   .tunnel-col-head{
-    font-size:11.5px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.4px;
-    color:#fff;
-    background:var(--input-accent);
-    padding:4px 8px;
-    border-radius:3px;
-    margin-top:8px;
-    text-align:center;
+    font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#fff;
+    background:var(--input-accent);padding:4px 8px;border-radius:3px;margin-top:8px;text-align:center;
   }
   .downline-col .tunnel-col-head{background:#5C7A8F;}
   .twin-grid label{font-size:12.5px;margin:8px 0 2px 0;}
   .twin-grid input{padding:6px 7px;font-size:13px;}
 
   .out-header{
-    font-size:15px;
-    font-weight:700;
-    color:var(--output-accent);
-    margin:0 0 4px 0;
-    text-transform:uppercase;
-    letter-spacing:.4px;
+    font-size:15px;font-weight:700;color:var(--output-accent);margin:0 0 4px 0;
+    text-transform:uppercase;letter-spacing:.4px;
   }
   .out-block{
-    background:#fff;
-    border:1px solid var(--divider);
-    border-radius:4px;
-    padding:16px 18px;
-    margin-bottom:18px;
+    background:#fff;border:1px solid var(--divider);border-radius:4px;
+    padding:16px 18px;margin-bottom:18px;
   }
+  .id-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 16px;}
+  .id-grid .k{font-size:11px;color:#7a7a7a;text-transform:uppercase;letter-spacing:.3px;}
+  .id-grid .v{font-family:'Roboto Mono',monospace;font-size:15px;font-weight:700;color:var(--output-accent);word-break:break-word;}
   .recap-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-    gap:10px 16px;
-    font-family:'Roboto Mono',monospace;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:10px 16px;font-family:'Roboto Mono',monospace;
   }
   .recap-item .k{font-size:11px;color:#7a7a7a;text-transform:uppercase;letter-spacing:.3px;}
   .recap-item .v{font-size:16px;font-weight:700;color:var(--output-accent);}
 
-  table.results{
-    width:100%;
-    border-collapse:collapse;
-    font-family:'Roboto Mono',monospace;
-    font-size:12.5px;
-  }
+  table.results{width:100%;border-collapse:collapse;font-family:'Roboto Mono',monospace;font-size:12.5px;}
   table.results th{
-    background:#E4EBEF;
-    color:var(--output-accent);
-    text-align:left;
-    padding:7px 8px;
-    font-family:'Inter',sans-serif;
-    font-size:11.5px;
-    text-transform:uppercase;
-    letter-spacing:.3px;
+    background:#E4EBEF;color:var(--output-accent);text-align:left;padding:7px 8px;
+    font-family:'Inter',sans-serif;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;
     border-bottom:2px solid var(--divider);
   }
-  table.results td{
-    padding:7px 8px;
-    border-bottom:1px solid #E8E5DE;
-  }
+  table.results td{padding:7px 8px;border-bottom:1px solid #E8E5DE;vertical-align:top;}
   .tag{
-    display:inline-block;
-    padding:2px 8px;
-    border-radius:10px;
-    font-family:'Inter',sans-serif;
-    font-weight:700;
-    font-size:11px;
+    display:inline-block;padding:2px 8px;border-radius:10px;
+    font-family:'Inter',sans-serif;font-weight:700;font-size:11px;
   }
   .tag.pass{background:#E4F0E9;color:var(--pass);}
   .tag.warn{background:#FBF0DE;color:var(--warn);}
   .tag.fail{background:#F5E3E2;color:var(--fail);}
 
-  .verdict{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    padding:14px 16px;
-    border-radius:4px;
-    margin-bottom:6px;
-  }
+  .verdict{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:4px;margin-bottom:10px;}
   .verdict.pass{background:#E4F0E9;border:1px solid var(--pass);}
   .verdict.warn{background:#FBF0DE;border:1px solid var(--warn);}
   .verdict.fail{background:#F5E3E2;border:1px solid var(--fail);}
-  .verdict .big{
-    font-family:'Roboto Mono',monospace;
-    font-size:26px;
-    font-weight:700;
-  }
+  .verdict .big{font-family:'Roboto Mono',monospace;font-size:26px;font-weight:700;white-space:nowrap;}
   .verdict.pass .big{color:var(--pass);}
   .verdict.warn .big{color:var(--warn);}
   .verdict.fail .big{color:var(--fail);}
   .verdict .desc{font-size:13px;color:#444;line-height:1.4;}
+
+  .alert{padding:9px 12px;font-size:12.5px;line-height:1.5;border-radius:3px;margin:8px 0 0 0;border-left:4px solid;}
+  .alert.warn{background:#FBF0DE;border-color:var(--warn);color:#6b4a0a;}
+  .alert.fail{background:#F5E3E2;border-color:var(--fail);color:#6e2220;}
+  .alert.pass{background:#E4F0E9;border-color:var(--pass);color:#245339;}
 
   svg#trough{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--divider);border-radius:4px;}
 
@@ -267,62 +162,29 @@
   .cat-table tr.highlight td{background:#FFF3D6;font-weight:700;}
 
   footer.disclaimer-block{
-    max-width:1100px;
-    margin:24px auto 0 auto;
-    padding:14px 24px 10px 24px;
-    font-size:11.5px;
-    color:#8a8a8a;
-    line-height:1.5;
-    border-top:1px solid var(--divider);
+    max-width:1100px;margin:24px auto 0 auto;padding:14px 24px 10px 24px;
+    font-size:11.5px;color:#8a8a8a;line-height:1.5;border-top:1px solid var(--divider);
   }
-  .copyright{
-    text-align:center;
-    font-size:11px;
-    color:#a39c8e;
-    padding:8px 24px 30px 24px;
-    letter-spacing:.3px;
-  }
-  .placeholder{
-    color:#9a9a9a;
-    font-size:13.5px;
-    padding:30px 10px;
-    text-align:center;
-    font-style:italic;
-  }
+  .copyright{text-align:center;font-size:11px;color:#a39c8e;padding:8px 24px 30px 24px;letter-spacing:.3px;}
+  .placeholder{color:#9a9a9a;font-size:13.5px;padding:30px 10px;text-align:center;font-style:italic;}
   .note-box{
-    background:#EAF0F4;
-    border-left:3px solid var(--output-accent);
-    padding:9px 12px;
-    font-size:12px;
-    color:#3a4a52;
-    border-radius:2px;
-    margin-bottom:14px;
-    line-height:1.5;
+    background:#EAF0F4;border-left:3px solid var(--output-accent);padding:9px 12px;font-size:12px;
+    color:#3a4a52;border-radius:2px;margin-bottom:10px;line-height:1.5;
   }
   #printBtn{
-    background:#fff;
-    color:var(--output-accent);
-    border:1.5px solid var(--output-accent);
-    border-radius:4px;
-    padding:8px 16px;
-    font-size:13px;
-    font-weight:700;
-    cursor:pointer;
-    margin-bottom:16px;
+    background:#fff;color:var(--output-accent);border:1.5px solid var(--output-accent);border-radius:4px;
+    padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;
   }
   #printBtn:hover{background:var(--output-accent);color:#fff;}
 
   /* ===================== PRINT / PDF ===================== */
-  @page{
-    size:A4;
-    margin:15mm 15mm 15mm 15mm;
-  }
+  @page{size:A4;margin:15mm 15mm 15mm 15mm;}
   @media print{
     body{background:#fff;}
     .no-print{display:none !important;}
     .layout{display:block;}
     .col-input{display:none !important;}
-    .col-output{width:100% !important;padding:0;}
+    .col-output{width:100% !important;padding:0;background:#fff;}
     .out-block{border:1px solid #ccc;box-shadow:none;break-inside:avoid;}
     svg#trough{break-inside:avoid;}
     table.results, table.cat-table{break-inside:avoid;}
@@ -331,7 +193,6 @@
     header.toolbar .disclaimer{color:#555 !important;}
     footer.disclaimer-block{color:#333;}
     .copyright{color:#555;}
-    a[href]:after{content:"";}
   }
 </style>
 </head>
@@ -339,13 +200,20 @@
 
 <header class="toolbar">
   <h1>Building Impact Assessment — Tunnelling-Induced Settlement</h1>
-  <div class="code-ref">Method: Burland &amp; Wroth (1975) equivalent-beam theory · Boscardin &amp; Cording (1989) limiting tensile strain · Trough: Peck (1969) Gaussian, O'Reilly &amp; New (1982) K</div>
+  <div class="code-ref">Procedure: Mair, Taylor &amp; Burland (1996) · Burland &amp; Wroth (1974) beam theory · Boscardin &amp; Cording (1989) limiting tensile strain · Trough: Peck (1969), O'Reilly &amp; New (1982)</div>
   <div class="disclaimer">Disclaimer: This tool is provided for preliminary and educational use only. Results should be independently verified by a qualified engineer before use in design or construction. This is not a substitute for professional judgment or compliance verification against the applicable project-specific code requirements.</div>
 </header>
 
 <div class="layout">
   <!-- ============ INPUT COLUMN ============ -->
   <div class="col-input">
+
+    <fieldset>
+      <legend>Identification</legend>
+      <label>Building ID <span class="unit">(optional)</span></label>
+      <input type="text" id="bldgID" placeholder="e.g. NDMC Flats G+2 / B-12">
+      <div class="hint">Building ID and the Upline / Downline chainages (entered in the tunnel columns below) are repeated in the output and the printed PDF.</div>
+    </fieldset>
 
     <fieldset>
       <legend>Tunnel Configuration</legend>
@@ -360,6 +228,9 @@
       <div class="twin-grid single-mode" id="twinGrid">
         <div class="upline-col">
           <div class="tunnel-col-head">Upline Tunnel (reference, x = 0)</div>
+
+          <label>Chainage, UL <span class="unit">(optional)</span></label>
+          <input type="text" id="chUL" placeholder="e.g. CH 24+540">
 
           <label>Natural Ground Level, NGL₁ <span class="unit">(m)</span></label>
           <input type="number" id="ngl1" value="100.0" step="0.1">
@@ -382,6 +253,9 @@
 
         <div class="downline-col">
           <div class="tunnel-col-head">Downline Tunnel (x = spacing)</div>
+
+          <label>Chainage, DL <span class="unit">(optional)</span></label>
+          <input type="text" id="chDL" placeholder="e.g. CH 24+540">
 
           <label>Natural Ground Level, NGL₂ <span class="unit">(m)</span></label>
           <input type="number" id="ngl2" value="100.0" step="0.1">
@@ -424,11 +298,28 @@
       <label>Building length, L <span class="unit">(m)</span></label>
       <input type="number" id="Lb" value="24" step="0.5" min="1">
 
-      <label>Building height, H <span class="unit">(m, to eaves/roof)</span></label>
+      <label id="heightLabel">Building height, H <span class="unit">(m, foundation level to eaves; roof ignored)</span></label>
       <input type="number" id="Hb" value="9" step="0.5" min="1">
 
-      <label>Storeys <span class="unit">(informational; drawn on sketch)</span></label>
+      <label>Storeys above ground <span class="unit">(informational; drawn on sketch)</span></label>
       <input type="number" id="storeys" value="3" step="1" min="1">
+
+      <label>Basement present?</label>
+      <div class="radio-row" id="bsmtRow">
+        <label class="active"><input type="radio" name="bsmt" value="no" checked> No</label>
+        <label><input type="radio" name="bsmt" value="yes"> Yes</label>
+      </div>
+
+      <div class="sub-fields" id="bsmtFields">
+        <label>Basement depth below NGL, z<sub>b</sub> <span class="unit">(m, to underside of foundation / raft)</span></label>
+        <input type="number" id="bsmtDepth" value="4" step="0.5" min="0.5">
+
+        <label>Number of basement levels <span class="unit">(informational; drawn on sketch)</span></label>
+        <input type="number" id="bsmtLevels" value="1" step="1" min="1">
+
+        <div class="hint" id="beamHint"></div>
+        <div class="hint">The assessment is then made on the <b>sub-surface trough at foundation level</b> (Mair, Taylor &amp; Bracegirdle 1993), with the equivalent beam height H = z<sub>b</sub> + height above ground.</div>
+      </div>
 
       <label id="offsetLabel">Offset of near edge from Upline tunnel centerline, x₁ <span class="unit">(m, signed; x=0 at Upline centerline)</span></label>
       <input type="number" id="offset" value="-6" step="0.5">
@@ -449,7 +340,7 @@
       <legend>Building Material Stiffness</legend>
       <label>E/G ratio <span class="unit">(–)</span></label>
       <input type="number" id="eg" value="2.6" step="0.1" min="1">
-      <div class="hint"><b>Guideline (Burland &amp; Wroth 1975):</b> E/G = 2.6 for an isotropic elastic material. Real masonry/brickwork is more flexible in shear once cracked, so higher values are often adopted: E/G ≈ 12.5 is a common representative value for masonry, up to ≈ 18 for heavily fissured brickwork. Enter the value appropriate to the structure being assessed.</div>
+      <div class="hint"><b>Guideline (Burland &amp; Wroth 1974; Mair, Taylor &amp; Burland 1996):</b> E/G = 2.6 for load-bearing masonry (isotropic, ν = 0.3). For reinforced-concrete framed buildings on shallow foundations, which are more flexible in shear, E/G = 12.5 is more appropriate (Sec. 4.5).</div>
     </fieldset>
 
     <div class="calc-btn-wrap">
@@ -459,7 +350,7 @@
 
   <!-- ============ OUTPUT COLUMN ============ -->
   <div class="col-output" id="outputCol">
-    <div class="placeholder">Enter the tunnel, ground and building parameters on the left, then press <b>Calculate</b> to run the Burland &amp; Wroth / Boscardin–Cording assessment.</div>
+    <div class="placeholder">Enter the tunnel, ground and building parameters on the left, then press <b>Calculate</b>.</div>
   </div>
 </div>
 
@@ -470,7 +361,7 @@
 
 <script>
 /* ============================================================
-   Tunnel mode toggle (single / twin)
+   UI toggles
    ============================================================ */
 document.querySelectorAll('input[name=tunnelMode]').forEach(r=>{
   r.addEventListener('change', ()=>{
@@ -483,9 +374,6 @@ document.querySelectorAll('input[name=tunnelMode]').forEach(r=>{
   });
 });
 
-/* ============================================================
-   Orientation toggle UI
-   ============================================================ */
 document.querySelectorAll('input[name=orient]').forEach(r=>{
   r.addEventListener('change', ()=>{
     document.querySelectorAll('#orientRow label').forEach(l=>l.classList.remove('active'));
@@ -497,21 +385,40 @@ document.querySelectorAll('input[name=orient]').forEach(r=>{
       ? 'Offset of near edge from inflection point, y₁ <span class="unit">(m, signed; +ve = behind/settled side)</span>'
       : 'Offset of near edge from Upline tunnel centerline, x₁ <span class="unit">(m, signed; x=0 at Upline centerline)</span>';
     document.getElementById('orientHint').innerHTML = isLong
-      ? '<b>Longitudinal:</b> building runs parallel to the tunnel drive. Profile follows the S-shaped (cumulative Gaussian) curve along the drive direction; y = 0 is the point of contraflexure (inflection), assumed common to both tunnels (same face chainage).'
+      ? '<b>Longitudinal:</b> building runs parallel to the tunnel drive. Profile follows the S-shaped (cumulative Gaussian) curve along the drive direction; y = 0 is the point of contraflexure (inflexion), assumed common to both tunnels (same face chainage).'
       : "<b>Transverse:</b> building spans across the tunnel line at a fixed chainage — driven by the transverse Gaussian trough(s).";
   });
 });
 
-/* ============================================================
-   Print / PDF
-   ============================================================ */
+function updateBeamHint(){
+  const el = document.getElementById('beamHint');
+  const bs = document.querySelector('input[name=bsmt]:checked').value==='yes';
+  if(!bs){ el.innerHTML=''; return; }
+  const zb = parseFloat(document.getElementById('bsmtDepth').value);
+  const hag = parseFloat(document.getElementById('Hb').value);
+  if(isNaN(zb)||isNaN(hag)){ el.innerHTML=''; return; }
+  el.innerHTML = '<b>Equivalent beam height</b> H = z<sub>b</sub> + H<sub>ag</sub> = ' + zb.toFixed(2) + ' + ' + hag.toFixed(2) + ' = <b>' + (zb+hag).toFixed(2) + ' m</b> (foundation level to eaves).';
+}
+document.querySelectorAll('input[name=bsmt]').forEach(r=>{
+  r.addEventListener('change', ()=>{
+    document.querySelectorAll('#bsmtRow label').forEach(l=>l.classList.remove('active'));
+    r.closest('label').classList.add('active');
+    const yes = r.value==='yes';
+    document.getElementById('bsmtFields').classList.toggle('show', yes);
+    document.getElementById('heightLabel').innerHTML = yes
+      ? 'Height above ground level to eaves, H<sub>ag</sub> <span class="unit">(m; roof ignored)</span>'
+      : 'Building height, H <span class="unit">(m, foundation level to eaves; roof ignored)</span>';
+    updateBeamHint();
+  });
+});
+['bsmtDepth','Hb'].forEach(id=>document.getElementById(id).addEventListener('input', updateBeamHint));
+
 function printReport(){ window.print(); }
 
 /* ============================================================
    Math helpers
    ============================================================ */
 function erf(x){
-  // Abramowitz & Stegun 7.1.26
   const sign = x<0 ? -1:1; x=Math.abs(x);
   const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
   const t=1/(1+p*x);
@@ -519,262 +426,287 @@ function erf(x){
   return sign*y;
 }
 function normalCDF(z){ return 0.5*(1+erf(z/Math.sqrt(2))); }
+function normalPDF(u){ return Math.exp(-u*u/2)/Math.sqrt(2*Math.PI); }
 
-function gaussianS(x, Smax, i){ return Smax*Math.exp(-(x*x)/(2*i*i)); }
-function horizStrainTransverse(x, Smax, i, z0){
-  // New & O'Reilly (1991): horizontal strain is compressive within the points of
-  // contraflexure (|x|<i) and tensile outside them (|x|>i) — hence the leading minus sign.
-  const Sx = gaussianS(x, Smax, i);
-  return -(Sx/z0)*(1 - (x*x)/(i*i));
-}
-function longS(y, Smax_x0, i){ return Smax_x0*normalCDF(y/i); }
+function computeZ0(ngl, rl, dinv, dia){ return ngl - (rl - dinv + dia/2); }
 
-function computeZ0(ngl, rl, dinv, dia){
-  const invert = rl - dinv;
-  const axis = invert + dia/2;
-  return ngl - axis;
+// Trough parameters at foundation level z_b (z_b = 0 gives the surface trough).
+// i(z) = 0.175 z0 + 0.325 (z0 - z) for K = 0.5 (Mair, Taylor & Bracegirdle 1993), scaled by K/0.5
+// i.e. i = K (z0 - 0.65 z). Constant volume loss assumed at foundation level.
+function troughAtLevel(z0, D, VL, K, zb){
+  const i = K*(z0 - 0.65*zb);
+  const h = z0 - zb;
+  const S = ((VL/100)*Math.PI*D*D/4/(i*Math.sqrt(2*Math.PI)))*1000; // mm
+  return {i, h, S};
 }
 
-/* ============================================================
-   Zone splitting + Burland-Wroth strain calculation
-   ============================================================ */
-function maxAbsDeviation(profileFn, xStart, xEnd, nSamples){
-  const S0 = profileFn(xStart), S1 = profileFn(xEnd);
-  let maxDev = 0;
-  for(let k=0;k<=nSamples;k++){
-    const x = xStart + (xEnd-xStart)*k/nSamples;
-    const chord = S0 + (S1-S0)*(x-xStart)/(xEnd-xStart);
-    const dev = profileFn(x) - chord;
-    if(Math.abs(dev) > Math.abs(maxDev)){ maxDev = dev; }
+/* ---------- profile objects (settlement in mm, slopes in mm/m) ---------- */
+function makeTransverse(tuns){
+  const g = (x,t)=> t.S*Math.exp(-((x-t.c)*(x-t.c))/(2*t.i*t.i));
+  return {
+    kind:'transverse',
+    S:  x=> tuns.reduce((a,t)=> a + g(x,t), 0),
+    S1: x=> tuns.reduce((a,t)=> a - g(x,t)*(x-t.c)/(t.i*t.i), 0),
+    S2: x=> tuns.reduce((a,t)=> a + g(x,t)*(((x-t.c)*(x-t.c))/Math.pow(t.i,4) - 1/(t.i*t.i)), 0),
+    Sh: x=> tuns.reduce((a,t)=> a - ((x-t.c)/t.h)*g(x,t), 0),     // horizontal movement toward axis (mm)
+    lo: Math.min(...tuns.map(t=>t.c-2.5*t.i)),
+    hi: Math.max(...tuns.map(t=>t.c+2.5*t.i)),
+    known:null
+  };
+}
+function makeLongitudinal(tuns){ // tuns: {S: local amplitude (mm), i}
+  return {
+    kind:'longitudinal',
+    S:  y=> tuns.reduce((a,t)=> a + t.S*normalCDF(y/t.i), 0),
+    S1: y=> tuns.reduce((a,t)=> a + t.S*normalPDF(y/t.i)/t.i, 0),
+    S2: y=> tuns.reduce((a,t)=> a - t.S*(y/Math.pow(t.i,3))*normalPDF(y/t.i), 0),
+    Sh: ()=> 0,
+    lo: -2.5*Math.max(...tuns.map(t=>t.i)),
+    hi:  2.5*Math.max(...tuns.map(t=>t.i)),
+    known:[0]
+  };
+}
+
+// Points of inflexion of the actual (combined) profile inside (a,b)
+function findInflexions(P, a, b){
+  if(P.known) return P.known.filter(v=> v>a && v<b);
+  const N=2000, out=[];
+  let xp=a, fp=P.S2(a);
+  for(let k=1;k<=N;k++){
+    const x=a+(b-a)*k/N, f=P.S2(x);
+    if(fp*f<0){
+      let lo=xp, hi=x, flo=fp;
+      for(let j=0;j<50;j++){
+        const m=(lo+hi)/2, fm=P.S2(m);
+        if(flo*fm<=0){ hi=m; } else { lo=m; flo=fm; }
+      }
+      out.push((lo+hi)/2);
+    }
+    xp=x; fp=f;
   }
-  return maxDev; // signed: positive => sags below chord (sagging), negative => hogs above chord
+  return out;
 }
 
-function burlandWrothStrains(DR, Lz, H, EG, zoneType){
-  // t = distance from neutral axis to extreme fibre; a = same (per Burland & Wroth 1975)
-  const t = zoneType==='sagging' ? H/2 : H;
-  const a = t;
-  const I = Math.pow(H,3)/12; // per unit thickness
-  const ebmax = DR / ( Lz/(12*t) + (3*I)/(2*a*Lz*H) * EG );
-  const edmax = DR / ( 1 + (H*Lz*Lz)/(18*I) * (1/EG) );
-  return {ebmax, edmax, t};
-}
-
-function combineStrains(ebmax, edmax, eh, EG){
-  const ebr = ebmax + eh;
-  const edr = eh*(1-EG/4) + Math.sqrt( (eh*eh/16)*EG*EG + edmax*edmax );
-  return {ebr, edr, emax: Math.max(ebr, edr)};
+function maxSignedDeviation(S, xs, xe, n){
+  const S0=S(xs), S1=S(xe); let md=0;
+  for(let k=0;k<=n;k++){
+    const x = xs+(xe-xs)*k/n;
+    const d = S(x) - (S0 + (S1-S0)*(x-xs)/(xe-xs));
+    if(Math.abs(d)>Math.abs(md)) md=d;
+  }
+  return md;
 }
 
 function damageCategory(strainPct){
-  if(strainPct <= 0.05) return {cat:0, label:'Negligible', cls:'pass', typ:'Hairline cracks < 0.1 mm'};
-  if(strainPct <= 0.075) return {cat:1, label:'Very Slight', cls:'pass', typ:'Fine cracks, easily treated, < 1 mm'};
-  if(strainPct <= 0.15) return {cat:2, label:'Slight', cls:'warn', typ:'Cracks easily filled, redecoration likely, < 5 mm'};
-  if(strainPct <= 0.30) return {cat:3, label:'Moderate', cls:'fail', typ:'Cracks require some opening up and repair, 5–15 mm'};
-  return {cat:4, label:'Severe / Very Severe', cls:'fail', typ:'Extensive repair involving breaking-out and replacing sections, > 15 mm; structural damage possible'};
+  if(strainPct <= 0.05)  return {cat:0, label:'Negligible', cls:'pass', typ:'Hairline cracks < 0.1 mm'};
+  if(strainPct <= 0.075) return {cat:1, label:'Very Slight', cls:'pass', typ:'Fine cracks, easily treated, up to 1 mm'};
+  if(strainPct <= 0.15)  return {cat:2, label:'Slight', cls:'warn', typ:'Cracks easily filled, redecoration probably required, up to 5 mm'};
+  if(strainPct <= 0.30)  return {cat:3, label:'Moderate', cls:'fail', typ:'Cracks require some opening up and patching, 5–15 mm'};
+  return {cat:4, label:'Severe to Very Severe', cls:'fail', typ:'Extensive repair or partial/complete rebuilding, > 15 mm'};
 }
+function catLabel(c){ return c.cat===4 ? '4–5' : String(c.cat); }
 
-/* ============================================================
-   Main assessment routine
-   ============================================================ */
-function runAssessment(){
-  const twin = document.querySelector('input[name=tunnelMode]:checked').value==='twin';
-  const spacing = twin ? parseFloat(document.getElementById('spacing').value) : 0;
-
-  const ngl1=parseFloat(document.getElementById('ngl1').value), rl1=parseFloat(document.getElementById('rl1').value),
-        dinv1=parseFloat(document.getElementById('dinv1').value), D1=parseFloat(document.getElementById('dia1').value),
-        VL1=parseFloat(document.getElementById('vl1').value), K1=parseFloat(document.getElementById('k1').value);
-
-  let ngl2,rl2,dinv2,D2,VL2,K2;
-  if(twin){
-    ngl2=parseFloat(document.getElementById('ngl2').value); rl2=parseFloat(document.getElementById('rl2').value);
-    dinv2=parseFloat(document.getElementById('dinv2').value); D2=parseFloat(document.getElementById('dia2').value);
-    VL2=parseFloat(document.getElementById('vl2').value); K2=parseFloat(document.getElementById('k2').value);
-  }
-
-  const orient = document.querySelector('input[name=orient]:checked').value;
-  const Lb = parseFloat(document.getElementById('Lb').value);
-  const Hb = parseFloat(document.getElementById('Hb').value);
-  const x1in = parseFloat(document.getElementById('offset').value);
-  const x0perp1 = parseFloat(document.getElementById('perpOffset').value)||0;
-  const EG = parseFloat(document.getElementById('eg').value);
-  const foundation = document.getElementById('foundation').value;
-  const storeys = parseInt(document.getElementById('storeys').value)||1;
-
-  const basicVals = [ngl1,rl1,dinv1,D1,VL1,K1,Lb,Hb,x1in,EG];
-  if(twin) basicVals.push(ngl2,rl2,dinv2,D2,VL2,K2,spacing);
-  if(basicVals.some(v=>isNaN(v)) || D1<=0 || Lb<=0 || Hb<=0 || K1<=0 || EG<=0 || (twin && (D2<=0||K2<=0))){
-    document.getElementById('outputCol').innerHTML = '<div class="placeholder">Please check inputs — all fields must be valid numbers (levels and offsets may be negative).</div>';
-    return;
-  }
-
-  const z0_1 = computeZ0(ngl1, rl1, dinv1, D1);
-  if(z0_1<=0){
-    document.getElementById('outputCol').innerHTML = '<div class="placeholder">Upline tunnel: computed z₀ (NGL − axis level) is not positive — check NGL, RL, Δ and diameter.</div>';
-    return;
-  }
-  const i1 = K1*z0_1;
-  const Smax1_mm = ( (VL1/100) * Math.PI * D1*D1/4 / (i1*Math.sqrt(2*Math.PI)) ) * 1000;
-
-  let z0_2, i2, Smax2_mm;
-  if(twin){
-    z0_2 = computeZ0(ngl2, rl2, dinv2, D2);
-    if(z0_2<=0){
-      document.getElementById('outputCol').innerHTML = '<div class="placeholder">Downline tunnel: computed z₀ (NGL − axis level) is not positive — check NGL, RL, Δ and diameter.</div>';
-      return;
-    }
-    i2 = K2*z0_2;
-    Smax2_mm = ( (VL2/100) * Math.PI * D2*D2/4 / (i2*Math.sqrt(2*Math.PI)) ) * 1000;
-  }
-
-  let profileFn, horizFn, x2in, breakpoints;
-  if(orient==='transverse'){
-    profileFn = (x)=> gaussianS(x, Smax1_mm, i1) + (twin ? gaussianS(x-spacing, Smax2_mm, i2) : 0);
-    horizFn = (x)=> horizStrainTransverse(x, Smax1_mm, i1, z0_1) + (twin ? horizStrainTransverse(x-spacing, Smax2_mm, i2, z0_2) : 0);
-    x2in = x1in + Lb;
-    breakpoints = [-i1, i1];
-    if(twin) breakpoints.push(spacing-i2, spacing+i2);
-    breakpoints = breakpoints.filter(bp => bp> Math.min(x1in,x2in) && bp < Math.max(x1in,x2in));
-  } else {
-    const SmaxLocal1 = Smax1_mm * Math.exp(-(x0perp1*x0perp1)/(2*i1*i1));
-    const x0perp2 = x0perp1 + spacing;
-    const SmaxLocal2 = twin ? Smax2_mm * Math.exp(-(x0perp2*x0perp2)/(2*i2*i2)) : 0;
-    profileFn = (y)=> longS(y, SmaxLocal1, i1) + (twin ? longS(y, SmaxLocal2, i2) : 0);
-    horizFn = ()=> 0; // see longitudinal simplification note in output
-    x2in = x1in + Lb;
-    breakpoints = [0].filter(bp => bp> Math.min(x1in,x2in) && bp < Math.max(x1in,x2in));
-  }
-
-  let bounds = [x1in, ...breakpoints.sort((a,b)=>a-b), x2in];
-  bounds = [...new Set(bounds.map(v=>Math.round(v*1000)/1000))].sort((a,b)=>a-b);
-
-  const zones = [];
-  for(let k=0;k<bounds.length-1;k++){
-    const zs = bounds[k], ze = bounds[k+1];
-    const Lz = ze - zs;
-    if(Lz < 0.25) continue;
-    const dev = maxAbsDeviation(profileFn, zs, ze, 60);
-    const zoneType = dev >= 0 ? 'sagging' : 'hogging';
-    const Delta = Math.abs(dev);
-    const DR = (Delta/1000) / Lz;
-
-    const {ebmax, edmax, t} = burlandWrothStrains(DR, Lz, Hb, EG, zoneType);
-
-    const xmid = (zs+ze)/2;
-    const eh = horizFn(xmid)/1000;
-
-    const {ebr, edr, emax} = combineStrains(ebmax, edmax, eh, EG);
-    const emaxPct = emax*100;
-    const cat = damageCategory(emaxPct);
-
-    zones.push({ zs, ze, Lz, zoneType, Delta, DR, t, ebmax, edmax, eh, ebr, edr, emax, emaxPct, cat });
-  }
-
-  renderResults({
-    twin, spacing, orient, Lb, Hb, x1in, x2in, x0perp1, EG, foundation, storeys,
-    ngl1,rl1,dinv1,D1,VL1,K1,z0_1,i1,Smax1_mm,
-    ngl2,rl2,dinv2,D2,VL2,K2,z0_2,i2,Smax2_mm,
-    zones, profileFn, breakpoints
-  });
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-
-/* ============================================================
-   Rendering
-   ============================================================ */
 function fmt(v,d){ return (v===undefined||v===null||isNaN(v)) ? '—' : v.toFixed(d); }
 
+/* ============================================================
+   Inputs -> computation -> rendering
+   ============================================================ */
+function readInputs(){
+  const num = id => parseFloat(document.getElementById(id).value);
+  const txt = id => document.getElementById(id).value.trim();
+  const twin = document.querySelector('input[name=tunnelMode]:checked').value==='twin';
+  const basement = document.querySelector('input[name=bsmt]:checked').value==='yes';
+  return {
+    bldgID: txt('bldgID'), chUL: txt('chUL'), chDL: txt('chDL'),
+    twin, spacing: twin ? num('spacing') : 0,
+    t1:{ ngl:num('ngl1'), rl:num('rl1'), dinv:num('dinv1'), D:num('dia1'), VL:num('vl1'), K:num('k1') },
+    t2: twin ? { ngl:num('ngl2'), rl:num('rl2'), dinv:num('dinv2'), D:num('dia2'), VL:num('vl2'), K:num('k2') } : null,
+    orient: document.querySelector('input[name=orient]:checked').value,
+    Lb: num('Lb'), Hin: num('Hb'), storeys: parseInt(document.getElementById('storeys').value)||1,
+    basement, zb: basement ? num('bsmtDepth') : 0, nb: basement ? (parseInt(document.getElementById('bsmtLevels').value)||1) : 0,
+    x1: num('offset'), x0perp: num('perpOffset')||0,
+    EG: num('eg'), foundation: document.getElementById('foundation').value
+  };
+}
+
+function compute(inp){
+  const bad = v => v===undefined || v===null || isNaN(v);
+  const nums = [inp.Lb, inp.Hin, inp.x1, inp.EG, ...Object.values(inp.t1)];
+  if(inp.twin) nums.push(inp.spacing, ...Object.values(inp.t2));
+  if(inp.basement) nums.push(inp.zb);
+  if(nums.some(bad) || inp.t1.D<=0 || inp.t1.K<=0 || inp.Lb<=0 || inp.Hin<=0 || inp.EG<=0 ||
+     (inp.twin && (inp.t2.D<=0 || inp.t2.K<=0)) || (inp.basement && inp.zb<=0)){
+    return {error:'Please check inputs — all fields must be valid numbers (levels and offsets may be negative; dimensions must be positive).'};
+  }
+
+  const zb = inp.basement ? inp.zb : 0;
+  const H = inp.Hin + zb;      // equivalent beam height: foundation level to eaves
+  const Hag = inp.Hin;
+
+  const z0_1 = computeZ0(inp.t1.ngl, inp.t1.rl, inp.t1.dinv, inp.t1.D);
+  if(z0_1<=0) return {error:'Upline tunnel: computed z₀ (NGL − axis level) is not positive — check NGL, RL, Δ and diameter.'};
+  if(inp.basement && !(z0_1 - zb > inp.t1.D/2)) return {error:'Basement foundation level is at or below the Upline tunnel crown — reduce basement depth z_b or check levels.'};
+  const f1 = troughAtLevel(z0_1, inp.t1.D, inp.t1.VL, inp.t1.K, zb);
+  const s1 = troughAtLevel(z0_1, inp.t1.D, inp.t1.VL, inp.t1.K, 0);
+
+  let z0_2=null, f2=null, s2=null;
+  if(inp.twin){
+    z0_2 = computeZ0(inp.t2.ngl, inp.t2.rl, inp.t2.dinv, inp.t2.D);
+    if(z0_2<=0) return {error:'Downline tunnel: computed z₀ (NGL − axis level) is not positive — check NGL, RL, Δ and diameter.'};
+    if(inp.basement && !(z0_2 - zb > inp.t2.D/2)) return {error:'Basement foundation level is at or below the Downline tunnel crown — reduce basement depth z_b or check levels.'};
+    f2 = troughAtLevel(z0_2, inp.t2.D, inp.t2.VL, inp.t2.K, zb);
+    s2 = troughAtLevel(z0_2, inp.t2.D, inp.t2.VL, inp.t2.K, 0);
+  }
+
+  // clear separation between tunnels
+  let clearSep=null, sepWarn=false;
+  if(inp.twin){
+    clearSep = Math.abs(inp.spacing) - (inp.t1.D + inp.t2.D)/2;
+    if(clearSep<=0) return {error:'Tunnels overlap: centre-to-centre spacing is not larger than the mean diameter.'};
+    sepWarn = clearSep < Math.max(inp.t1.D, inp.t2.D);
+  }
+
+  // profile at foundation level
+  let P;
+  if(inp.orient==='transverse'){
+    const tuns=[{S:f1.S,i:f1.i,h:f1.h,c:0}];
+    if(inp.twin) tuns.push({S:f2.S,i:f2.i,h:f2.h,c:inp.spacing});
+    P = makeTransverse(tuns);
+  } else {
+    const tuns=[{S:f1.S*Math.exp(-(inp.x0perp*inp.x0perp)/(2*f1.i*f1.i)), i:f1.i}];
+    if(inp.twin){
+      const x02 = inp.x0perp + inp.spacing;
+      tuns.push({S:f2.S*Math.exp(-(x02*x02)/(2*f2.i*f2.i)), i:f2.i});
+    }
+    P = makeLongitudinal(tuns);
+  }
+
+  const xs0 = inp.x1, xe0 = inp.x1 + inp.Lb;
+
+  // ---- Stage 1 screening (greenfield, at foundation level, over the whole building) ----
+  let maxS=0, maxSlope=0;
+  for(let k=0;k<=400;k++){
+    const x = xs0 + (xe0-xs0)*k/400;
+    maxS = Math.max(maxS, P.S(x));
+    maxSlope = Math.max(maxSlope, Math.abs(P.S1(x))/1000);
+  }
+  const stage1 = { maxS, maxSlope, pass: (maxS < 10 && maxSlope < 1/500) };
+
+  // ---- Stage 2: zones ----
+  const a = Math.max(xs0, P.lo), b = Math.min(xe0, P.hi);
+  const outside = (b - a) < 0.25;
+  const zones = [];
+  if(!outside){
+    const bounds = [a, ...findInflexions(P, a, b), b];
+    for(let k=0;k<bounds.length-1;k++){
+      const zs=bounds[k], ze=bounds[k+1], Lz=ze-zs;
+      if(Lz<0.25) continue;
+      const dev = maxSignedDeviation(P.S, zs, ze, 200);
+      const typ = dev>=0 ? 'sagging':'hogging';
+      const Delta = Math.abs(dev);
+      const DR = (Delta/1000)/Lz;
+      const t = typ==='sagging' ? H/2 : H;
+      const I = typ==='sagging' ? Math.pow(H,3)/12 : Math.pow(H,3)/3;
+      const eb = DR / ( Lz/(12*t) + (3*I)/(2*t*Lz*H) * inp.EG );
+      const ed = DR / ( 1 + (H*Lz*Lz)/(18*I) * (1/inp.EG) );
+      const eh = (P.Sh(ze) - P.Sh(zs))/1000/Lz;
+      const ebt = eb + eh;
+      const edt = 0.35*eh + Math.sqrt(Math.pow(0.65*eh,2) + ed*ed);
+      const emax = Math.max(ebt, edt);
+      const emaxPct = emax*100;
+      zones.push({zs,ze,Lz,typ,Delta,DR,t,I,eb,ed,eh,ebt,edt,emax,emaxPct,cat:damageCategory(emaxPct)});
+    }
+  }
+
+  return {
+    inp, H, Hag, zb, z0_1, z0_2, f1, f2, s1, s2, clearSep, sepWarn,
+    P, x1in:xs0, x2in:xe0, zones, outside, stage1,
+    inflAll: findInflexions(P, P.lo, P.hi)
+  };
+}
+
+function runAssessment(){
+  const inp = readInputs();
+  const R = compute(inp);
+  const out = document.getElementById('outputCol');
+  if(R.error){
+    out.innerHTML = '<div class="placeholder">'+esc(R.error)+'</div>';
+    return;
+  }
+  document.title = 'Burland Assessment – ' + (inp.bldgID||'Building') + (inp.chUL?(' – UL '+inp.chUL):'') + (inp.twin&&inp.chDL?(' / DL '+inp.chDL):'');
+  renderResults(R);
+}
+
+/* ============================================================
+   Rendering (results first, equations last)
+   ============================================================ */
 function renderResults(R){
+  const inp = R.inp;
   const governing = R.zones.reduce((a,b)=> (!a || b.emaxPct>a.emaxPct)? b : a, null);
   const out = document.getElementById('outputCol');
-
   let html = '';
 
   html += `<button id="printBtn" class="no-print" onclick="printReport()">🖶 Print / Save as PDF (A4)</button>`;
 
-  // --- Recap ---
-  html += `<div class="out-header">Trough &amp; Building Summary</div>`;
-  html += `<div class="out-block"><div class="recap-grid">
-    <div class="recap-item"><div class="k">Tunnel config.</div><div class="v" style="font-size:14px;">${R.twin?'Twin':'Single'}</div></div>
-    <div class="recap-item"><div class="k">z₀ Upline</div><div class="v">${fmt(R.z0_1,2)} m</div></div>
-    ${R.twin?`<div class="recap-item"><div class="k">z₀ Downline</div><div class="v">${fmt(R.z0_2,2)} m</div></div>`:''}
-    <div class="recap-item"><div class="k">S<sub>max</sub> Upline</div><div class="v">${fmt(R.Smax1_mm,1)} mm</div></div>
-    ${R.twin?`<div class="recap-item"><div class="k">S<sub>max</sub> Downline</div><div class="v">${fmt(R.Smax2_mm,1)} mm</div></div>`:''}
-    ${R.twin?`<div class="recap-item"><div class="k">Spacing</div><div class="v">${fmt(R.spacing,1)} m</div></div>`:''}
-    <div class="recap-item"><div class="k">Orientation</div><div class="v" style="font-size:14px;">${R.orient==='transverse'?'Transverse':'Longitudinal'}</div></div>
-    <div class="recap-item"><div class="k">Building L × H</div><div class="v" style="font-size:14px;">${fmt(R.Lb,1)} × ${fmt(R.Hb,1)} m</div></div>
-    <div class="recap-item"><div class="k">E/G ratio</div><div class="v">${fmt(R.EG,2)}</div></div>
-    <div class="recap-item"><div class="k">Foundation</div><div class="v" style="font-size:13px;">${R.foundation}</div></div>
+  // ---- Identification ----
+  const today = new Date().toLocaleDateString('en-GB');
+  html += `<div class="out-block"><div class="id-grid">
+    <div><div class="k">Building ID</div><div class="v">${esc(inp.bldgID)||'—'}</div></div>
+    <div><div class="k">Chainage — Upline</div><div class="v">${esc(inp.chUL)||'—'}</div></div>
+    ${inp.twin?`<div><div class="k">Chainage — Downline</div><div class="v">${esc(inp.chDL)||'—'}</div></div>`:''}
+    <div><div class="k">Date</div><div class="v">${today}</div></div>
   </div></div>`;
 
-  if(R.orient==='longitudinal'){
-    html += `<div class="note-box"><b>Note:</b> for the longitudinal case, the horizontal ground strain contribution is conservatively taken as zero — the governing mechanism is bending/diagonal strain from the deflection ratio along the S-curve profile. ${R.twin?'Both tunnel faces are assumed at the same chainage (y=0) for this combined check. ':''}Verify against a full 3-D assessment for critical structures.</div>`;
-  }
-  if(R.twin){
-    html += `<div class="note-box"><b>Twin-tunnel superposition:</b> the combined settlement and horizontal-strain profiles are obtained by linear superposition of the two independent Gaussian troughs — a standard simplifying assumption for preliminary combined assessments. Zone breakpoints use the individual inflection points of each trough; for closely-spaced or highly asymmetric tunnels, verify sagging/hogging classification against the plotted profile.</div>`;
-  }
-
-  // --- Equations used ---
-  html += `<div class="out-header">Equations Used</div>`;
-  html += `<div class="out-block"><div style="overflow-x:auto;"><table class="results" style="font-size:11.5px;">
-    <thead><tr><th style="width:30%;">Parameter</th><th>Equation</th><th style="width:14%;">Reference</th></tr></thead>
-    <tbody>
-    <tr><td>Invert level</td><td>Invert = RL − Δ</td><td>—</td></tr>
-    <tr><td>Axis level</td><td>Axis = Invert + D/2</td><td>—</td></tr>
-    <tr><td>Tunnel axis depth, z₀</td><td>z₀ = NGL − Axis level</td><td>—</td></tr>
-    <tr><td>Trough width parameter, i</td><td>i = K · z₀ &nbsp; (computed per tunnel)</td><td>O'Reilly &amp; New (1982)</td></tr>
-    <tr><td>Max. settlement, S<sub>max</sub></td><td>S<sub>max</sub> = (V<sub>L</sub>/100 · πD²/4) / (i·√(2π)) &nbsp; (computed per tunnel)</td><td>Peck (1969)</td></tr>
-    <tr><td>Transverse trough, S(x)</td><td>S(x) = S<sub>max,1</sub>·exp(−x²/2i₁²) ${R.twin?'+ S<sub>max,2</sub>·exp(−(x−s)²/2i₂²)':''}</td><td>Peck (1969) Gaussian${R.twin?' + superposition':''}</td></tr>
-    <tr><td>Longitudinal trough, S(y)</td><td>S(y) = S<sub>max,x0,1</sub>·Φ(y/i₁) ${R.twin?'+ S<sub>max,x0,2</sub>·Φ(y/i₂)':''}, &nbsp; S<sub>max,x0</sub> = S<sub>max</sub>·exp(−x₀²/2i²)</td><td>Attewell &amp; Woodman (1982)</td></tr>
-    <tr><td>Deflection, Δ</td><td>Δ = max&#124;S(x) − chord(x)&#124; over the zone, chord = straight line joining the zone's two ends</td><td>Burland &amp; Wroth (1975)</td></tr>
-    <tr><td>Deflection ratio, DR</td><td>DR = Δ / L<sub>zone</sub></td><td>Burland &amp; Wroth (1975)</td></tr>
-    <tr><td>Neutral axis distance, t</td><td>t = H/2 (sagging, restrained base) &nbsp;|&nbsp; t = H (hogging, unrestrained base)</td><td>Burland &amp; Wroth (1975)</td></tr>
-    <tr><td>Bending strain, ε<sub>b,max</sub></td><td>ε<sub>b,max</sub> = DR / [ L/(12t) + 3I/(2tLH) · (E/G) ], &nbsp; I = H³/12</td><td>Burland &amp; Wroth (1975)</td></tr>
-    <tr><td>Diagonal strain, ε<sub>d,max</sub></td><td>ε<sub>d,max</sub> = DR / [ 1 + (HL²/18I) · (G/E) ]</td><td>Burland &amp; Wroth (1975)</td></tr>
-    <tr><td>Horizontal ground strain, ε<sub>h</sub></td><td>ε<sub>h</sub>(x) = −(S(x)/z₀)·(1 − x²/i²) &nbsp;[compressive within &#124;x&#124;&lt;i, tensile outside]${R.twin?', summed over both tunnels':''}</td><td>New &amp; O'Reilly (1991)</td></tr>
-    <tr><td>Combined bending, ε<sub>br</sub></td><td>ε<sub>br</sub> = ε<sub>b,max</sub> + ε<sub>h</sub></td><td>Boscardin &amp; Cording (1989)</td></tr>
-    <tr><td>Combined diagonal, ε<sub>dr</sub></td><td>ε<sub>dr</sub> = ε<sub>h</sub>(1 − E/4G) + √[ (ε<sub>h</sub>²/16)(E/G)² + ε<sub>d,max</sub>² ]</td><td>Boscardin &amp; Cording (1989)</td></tr>
-    <tr><td>Governing strain, ε<sub>max</sub></td><td>ε<sub>max</sub> = max( ε<sub>br</sub> , ε<sub>dr</sub> )</td><td>Boscardin &amp; Cording (1989)</td></tr>
-    <tr><td>Damage category</td><td>Lookup of ε<sub>max</sub> against limiting tensile strain bands</td><td>Burland &amp; Wroth / Boscardin &amp; Cording</td></tr>
-    </tbody>
-  </table></div></div>`;
-
-  // --- Diagram ---
-  html += `<div class="out-header">Building on Settlement Profile</div>`;
-  html += `<div class="out-block">${buildSVG(R)}</div>`;
-
-  // --- Governing verdict ---
-  if(governing){
-    html += `<div class="out-header">Governing Result</div>`;
-    html += `<div class="out-block">`;
+  // ---- Governing result ----
+  html += `<div class="out-header">Governing Result — Stage 2</div><div class="out-block">`;
+  if(R.outside){
+    html += `<div class="verdict pass"><div class="big">Cat 0</div>
+      <div class="desc"><b>Negligible</b> — the building lies outside the practical extent of the settlement trough (2.5i from the tunnel axis, i.e. ${fmt(R.P.lo,1)} to ${fmt(R.P.hi,1)} m). No tensile strain is computed.</div></div>`;
+  } else {
     html += `<div class="verdict ${governing.cat.cls}">
-      <div class="big">Cat ${governing.cat.cat}</div>
+      <div class="big">Cat ${catLabel(governing.cat)}</div>
       <div class="desc"><b>${governing.cat.label}</b> — ${governing.cat.typ}<br>
-      Governing zone: <b>${governing.zoneType}</b>, ε<sub>max</sub> = <b>${fmt(governing.emaxPct,3)}%</b> (DR = ${fmt(governing.DR*1000,2)}‰, Δ = ${fmt(governing.Delta,1)} mm over L<sub>zone</sub> = ${fmt(governing.Lz,1)} m)</div>
-    </div></div>`;
+      Governing zone: <b>${governing.typ}</b> (zone ${R.zones.indexOf(governing)+1}), ε<sub>max</sub> = <b>${fmt(governing.emaxPct,4)}%</b>
+      (DR = ${fmt(governing.DR*1000,3)}‰, Δ = ${fmt(governing.Delta,2)} mm over L<sub>zone</sub> = ${fmt(governing.Lz,1)} m)</div>
+    </div>`;
+    if(governing.cat.cat>=3){
+      html += `<div class="alert fail"><b>Category ≥ 3 — Stage 3 detailed evaluation required</b> (Mair, Taylor &amp; Burland 1996, Sec. 5.4): consider tunnelling sequence, 3-D layout, building stiffness and soil–structure interaction, and protective measures.</div>`;
+    }
   }
+  if(R.sepWarn){
+    html += `<div class="alert warn"><b>Twin-tunnel spacing:</b> clear separation between tunnels = ${fmt(R.clearSep,2)} m, which is less than one tunnel diameter (${fmt(Math.max(inp.t1.D,inp.t2.D),2)} m). Simple superposition may be unconservative; consider a greater volume loss for the second tunnel (Sec. 2.4).</div>`;
+  }
+  html += `</div>`;
 
-  // --- Zone-by-zone table (transposed: parameters as rows, zones as columns) ---
-  html += `<div class="out-header">Zone-by-Zone Results</div>`;
+  // ---- Diagram ----
+  html += `<div class="out-header">Building on Settlement Profile</div><div class="out-block">${buildSVG(R)}</div>`;
+
+  // ---- Zone table ----
+  html += `<div class="out-header">Stage 2 — Zone-by-Zone Results</div>`;
   if(R.zones.length===0){
-    html += `<div class="out-block"><div style="text-align:center;color:#999;padding:20px;">Building footprint too small / zero-length — check offsets.</div></div>`;
+    html += `<div class="out-block"><div style="text-align:center;color:#888;padding:16px;">No zone to assess — the building lies outside the trough extent (2.5i).</div></div>`;
   } else {
     const rows = [
-      {label:'Zone extent (m)', formula:'—', get:z=>`${fmt(z.zs,1)} to ${fmt(z.ze,1)}`},
-      {label:'Type', formula:'sign of max|S(x) − chord(x)|', get:z=>z.zoneType},
-      {label:'Zone length, L<sub>zone</sub> (m)', formula:'L<sub>zone</sub> = z<sub>e</sub> − z<sub>s</sub>', get:z=>fmt(z.Lz,1)},
-      {label:'Deflection, Δ (mm)', formula:'Δ = max|S(x) − chord(x)|', get:z=>fmt(z.Delta,1)},
-      {label:'Deflection ratio, DR (‰)', formula:'DR = Δ / L<sub>zone</sub>', get:z=>fmt(z.DR*1000,2)},
-      {label:'Neutral axis, t (m)', formula:'t = H/2 (sag) or H (hog)', get:z=>fmt(z.t,2)},
-      {label:'Bending strain, ε<sub>b,max</sub> (%)', formula:'ε<sub>b,max</sub> = DR / [L/(12t) + 3I/(2tLH)·E/G]', get:z=>fmt(z.ebmax*100,4)},
-      {label:'Diagonal strain, ε<sub>d,max</sub> (%)', formula:'ε<sub>d,max</sub> = DR / [1 + (HL²/18I)·G/E]', get:z=>fmt(z.edmax*100,4)},
-      {label:'Horizontal strain, ε<sub>h</sub> (%)', formula:'ε<sub>h</sub> = −(S/z₀)(1−x²/i²)', get:z=>fmt(z.eh*100,4)},
-      {label:'Combined bending, ε<sub>br</sub> (%)', formula:'ε<sub>br</sub> = ε<sub>b,max</sub> + ε<sub>h</sub>', get:z=>fmt(z.ebr*100,4)},
-      {label:'Combined diagonal, ε<sub>dr</sub> (%)', formula:'ε<sub>dr</sub> = ε<sub>h</sub>(1−E/4G) + √[(ε<sub>h</sub>²/16)(E/G)² + ε<sub>d,max</sub>²]', get:z=>fmt(z.edr*100,4)},
-      {label:'Governing strain, ε<sub>max</sub> (%)', formula:'ε<sub>max</sub> = max(ε<sub>br</sub>, ε<sub>dr</sub>)', get:z=>`<b>${fmt(z.emaxPct,4)}</b>`},
-      {label:'Damage category', formula:'lookup vs. LTS table', get:z=>`<span class="tag ${z.cat.cls}">Cat ${z.cat.cat} — ${z.cat.label}</span>`},
+      {label:'Zone extent (m)', formula:'inflexion points / building ends / 2.5i limit', get:z=>`${fmt(z.zs,2)} to ${fmt(z.ze,2)}`},
+      {label:'Type', formula:'sign of max (S − chord)', get:z=>z.typ},
+      {label:'Zone length, L<sub>zone</sub> (m)', formula:'z<sub>e</sub> − z<sub>s</sub>', get:z=>fmt(z.Lz,2)},
+      {label:'Deflection, Δ (mm)', formula:'max|S(x) − chord(x)|', get:z=>fmt(z.Delta,3)},
+      {label:'Deflection ratio, DR (‰)', formula:'DR = Δ / L<sub>zone</sub>', get:z=>fmt(z.DR*1000,3)},
+      {label:'Neutral axis, t (m)', formula:'H/2 sagging · H hogging', get:z=>fmt(z.t,2)},
+      {label:'I (m³ per m)', formula:'H³/12 sagging · H³/3 hogging', get:z=>fmt(z.I,2)},
+      {label:'Bending strain, ε<sub>b,max</sub> (%)', formula:'DR / [L/(12t) + 3I/(2tLH)·E/G]', get:z=>fmt(z.eb*100,4)},
+      {label:'Diagonal strain, ε<sub>d,max</sub> (%)', formula:'DR / [1 + (HL²/18I)·G/E]', get:z=>fmt(z.ed*100,4)},
+      {label:'Avg. horizontal strain, ε<sub>h</sub> (%)', formula:'[S<sub>h</sub>(z<sub>e</sub>) − S<sub>h</sub>(z<sub>s</sub>)] / L<sub>zone</sub>', get:z=>fmt(z.eh*100,4)},
+      {label:'Total bending, ε<sub>bt</sub> (%)', formula:'ε<sub>b,max</sub> + ε<sub>h</sub>', get:z=>fmt(z.ebt*100,4)},
+      {label:'Total diagonal, ε<sub>dt</sub> (%)', formula:'0.35ε<sub>h</sub> + √[(0.65ε<sub>h</sub>)² + ε<sub>d,max</sub>²]', get:z=>fmt(z.edt*100,4)},
+      {label:'Governing strain, ε<sub>max</sub> (%)', formula:'max(ε<sub>bt</sub>, ε<sub>dt</sub>)', get:z=>`<b>${fmt(z.emaxPct,4)}</b>`},
+      {label:'Damage category', formula:'limiting tensile strain table', get:z=>`<span class="tag ${z.cat.cls}">Cat ${catLabel(z.cat)} — ${z.cat.label}</span>`},
     ];
     let tbl = `<div class="out-block"><div style="overflow-x:auto;"><table class="results"><thead><tr>
-      <th style="width:20%;">Parameter</th><th style="width:26%;">Formula</th>`;
+      <th style="width:22%;">Parameter</th><th style="width:25%;">Formula</th>`;
     R.zones.forEach((z,idx)=>{ tbl += `<th>Zone ${idx+1}</th>`; });
     tbl += `</tr></thead><tbody>`;
     rows.forEach(r=>{
@@ -786,147 +718,253 @@ function renderResults(R){
     html += tbl;
   }
 
-  // --- Damage category reference ---
+  // ---- Stage 1 ----
+  const s1 = R.stage1;
+  html += `<div class="out-header">Stage 1 — Preliminary Screening</div><div class="out-block">
+    <table class="results"><thead><tr><th>Check (greenfield, at foundation level)</th><th>Value</th><th>Limit</th><th>Status</th></tr></thead><tbody>
+    <tr><td>Maximum settlement under building</td><td>${fmt(s1.maxS,2)} mm</td><td>&lt; 10 mm</td>
+        <td><span class="tag ${s1.maxS<10?'pass':'warn'}">${s1.maxS<10?'OK':'EXCEEDS'}</span></td></tr>
+    <tr><td>Maximum ground slope under building</td><td>${s1.maxSlope>0?('1 / '+fmt(1/s1.maxSlope,0)):'0'}</td><td>&lt; 1 / 500</td>
+        <td><span class="tag ${s1.maxSlope<1/500?'pass':'warn'}">${s1.maxSlope<1/500?'OK':'EXCEEDS'}</span></td></tr>
+    </tbody></table>
+    <div class="alert ${s1.pass?'pass':'warn'}">${s1.pass
+      ? '<b>Stage 1: building eliminated</b> — negligible risk of damage (Mair, Taylor &amp; Burland 1996, Sec. 5.2). Stage 2 results are shown above for completeness.'
+      : '<b>Stage 1: not eliminated</b> — proceed with the Stage 2 assessment above.'}</div>
+  </div>`;
+
+  // ---- Summary ----
+  html += `<div class="out-header">Trough &amp; Building Summary</div><div class="out-block"><div class="recap-grid">
+    <div class="recap-item"><div class="k">Tunnel config.</div><div class="v" style="font-size:14px;">${inp.twin?'Twin':'Single'}</div></div>
+    <div class="recap-item"><div class="k">z₀ Upline</div><div class="v">${fmt(R.z0_1,2)} m</div></div>
+    ${inp.twin?`<div class="recap-item"><div class="k">z₀ Downline</div><div class="v">${fmt(R.z0_2,2)} m</div></div>`:''}
+    <div class="recap-item"><div class="k">i Upline${inp.basement?' (at foundation)':''}</div><div class="v">${fmt(R.f1.i,2)} m</div></div>
+    ${inp.twin?`<div class="recap-item"><div class="k">i Downline${inp.basement?' (at foundation)':''}</div><div class="v">${fmt(R.f2.i,2)} m</div></div>`:''}
+    <div class="recap-item"><div class="k">S<sub>max</sub> Upline</div><div class="v">${fmt(R.f1.S,2)} mm</div></div>
+    ${inp.twin?`<div class="recap-item"><div class="k">S<sub>max</sub> Downline</div><div class="v">${fmt(R.f2.S,2)} mm</div></div>`:''}
+    ${inp.twin?`<div class="recap-item"><div class="k">Spacing (clear)</div><div class="v" style="font-size:14px;">${fmt(Math.abs(inp.spacing),2)} m (${fmt(R.clearSep,2)})</div></div>`:''}
+    <div class="recap-item"><div class="k">Trough extent (2.5i)</div><div class="v" style="font-size:14px;">${fmt(R.P.lo,1)} to ${fmt(R.P.hi,1)} m</div></div>
+    <div class="recap-item"><div class="k">Orientation</div><div class="v" style="font-size:14px;">${inp.orient==='transverse'?'Transverse':'Longitudinal'}</div></div>
+    <div class="recap-item"><div class="k">Building span</div><div class="v" style="font-size:14px;">${fmt(R.x1in,1)} to ${fmt(R.x2in,1)} m</div></div>
+    <div class="recap-item"><div class="k">Beam L × H</div><div class="v" style="font-size:14px;">${fmt(inp.Lb,1)} × ${fmt(R.H,1)} m</div></div>
+    <div class="recap-item"><div class="k">Basement</div><div class="v" style="font-size:14px;">${inp.basement?(inp.nb+' level(s), z<sub>b</sub> = '+fmt(R.zb,1)+' m'):'None'}</div></div>
+    <div class="recap-item"><div class="k">E/G ratio</div><div class="v">${fmt(inp.EG,2)}</div></div>
+    <div class="recap-item"><div class="k">Foundation</div><div class="v" style="font-size:13px;">${esc(inp.foundation)}</div></div>
+  </div></div>`;
+
+  // ---- Notes ----
+  let notes = `<div class="note-box"><b>Basis:</b> Stage 2 greenfield assessment — the building is assumed to follow the greenfield settlement trough at foundation level and its stiffness is not credited, so results are conservative (Mair, Taylor &amp; Burland 1996, Sec. 5.3). The building is partitioned at the points of inflexion of the combined profile and limited to the trough extent (2.5i).</div>`;
+  if(inp.orient==='longitudinal'){
+    notes += `<div class="note-box"><b>Longitudinal case:</b> horizontal ground strain is taken as zero; the check is governed by bending/diagonal strain from the S-curve deflection ratio. ${inp.twin?'Both tunnel faces are assumed at the same chainage (y = 0). ':''}The assessed span is limited to ±2.5i about the inflexion point. Verify against a full 3-D assessment for critical structures.</div>`;
+  }
+  if(inp.twin){
+    notes += `<div class="note-box"><b>Twin tunnels:</b> settlement and horizontal movements of the two tunnels are superimposed (Sec. 2.4); the zone boundaries are the numerically-located inflexion points of the combined profile.</div>`;
+  }
+  if(inp.basement){
+    notes += `<div class="note-box"><b>Basement:</b> the sub-surface trough at foundation level z<sub>b</sub> = ${fmt(R.zb,2)} m is used (i narrower than at surface, volume loss held constant), and the beam height is taken from the basement underside to the eaves. The sub-surface width relationship was derived for clays (Mair, Taylor &amp; Bracegirdle 1993) — apply judgement in other ground. A stiff basement box/raft will attenuate deflection ratio and horizontal strain (Potts &amp; Addenbrooke 1997): consider a relative-stiffness or Stage 3 assessment, and check basement walls and raft separately for the imposed settlements.</div>`;
+  }
+  html += `<div class="out-header">Notes</div><div class="out-block">${notes}</div>`;
+
+  // ---- Damage category reference ----
   const cats = [
-    [0,'Negligible','0 – 0.050','< 0.1 mm hairline'],
-    [1,'Very Slight','0.050 – 0.075','< 1 mm, fine cracks'],
-    [2,'Slight','0.075 – 0.150','< 5 mm, easily filled'],
-    [3,'Moderate','0.150 – 0.300','5 – 15 mm, some opening-up repair'],
-    [4,'Severe','> 0.300','15 – 25 mm, extensive repair'],
-    [5,'Very Severe','> 0.300','> 25 mm, structural attention required'],
+    ['0','Negligible','0 – 0.050','Hairline cracks < 0.1 mm'],
+    ['1','Very Slight','0.050 – 0.075','Fine cracks, easily treated, up to 1 mm'],
+    ['2','Slight','0.075 – 0.150','Cracks easily filled, up to 5 mm'],
+    ['3','Moderate','0.150 – 0.300','Cracks need opening up/patching, 5–15 mm'],
+    ['4–5','Severe to Very Severe','> 0.300','15–25 mm and above; extensive repair or rebuilding'],
   ];
-  html += `<div class="out-header">Damage Category Reference (Boscardin &amp; Cording 1989 / Burland &amp; Wroth 1975)</div>`;
-  html += `<div class="out-block"><table class="cat-table"><thead><tr><th>Cat.</th><th>Degree</th><th>Limiting Tensile Strain, %</th><th>Typical Damage</th></tr></thead><tbody>`;
+  html += `<div class="out-header">Damage Category Reference</div><div class="out-block"><table class="cat-table"><thead><tr><th>Cat.</th><th>Degree</th><th>Limiting Tensile Strain, %</th><th>Typical Damage</th></tr></thead><tbody>`;
   cats.forEach(c=>{
-    const isHi = governing && c[0]===governing.cat.cat;
+    const isHi = governing && !R.outside && c[0]===catLabel(governing.cat);
     html += `<tr class="${isHi?'highlight':''}"><td>${c[0]}</td><td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td></tr>`;
   });
-  html += `</tbody></table></div>`;
+  html += `</tbody></table>
+    <div class="hint" style="margin-top:8px;">Limiting tensile strains after Boscardin &amp; Cording (1989); damage descriptions after Burland et al. (1977). The Category 2/3 boundary is the key threshold for risk assessment.</div></div>`;
+
+  // ---- Equations used (end) ----
+  const tw = inp.twin;
+  html += `<div class="out-header">Equations Used</div>`;
+  html += `<div class="out-block"><div style="overflow-x:auto;"><table class="results" style="font-size:11.5px;">
+    <thead><tr><th style="width:28%;">Parameter</th><th>Equation</th><th style="width:20%;">Reference</th></tr></thead>
+    <tbody>
+    <tr><td>Tunnel axis depth, z₀</td><td>Invert = RL − Δ; Axis = Invert + D/2; z₀ = NGL − Axis</td><td>—</td></tr>
+    <tr><td>Trough width, i (surface)</td><td>i = K · z₀ &nbsp;(per tunnel)</td><td>O'Reilly &amp; New (1982)</td></tr>
+    ${inp.basement?`<tr><td>Trough width at foundation level, i(z<sub>b</sub>)</td><td>i(z<sub>b</sub>) = 0.175z₀ + 0.325(z₀ − z<sub>b</sub>) for K = 0.5, scaled by K/0.5, i.e. i = K(z₀ − 0.65z<sub>b</sub>)</td><td>Mair, Taylor &amp; Bracegirdle (1993)</td></tr>`:''}
+    <tr><td>Max. settlement, S<sub>max</sub>${inp.basement?' (at foundation level)':''}</td><td>S<sub>max</sub> = (V<sub>L</sub>/100 · πD²/4) / (i·√(2π)) &nbsp;(per tunnel${inp.basement?', constant volume':''})</td><td>Peck (1969)</td></tr>
+    <tr><td>Transverse trough, S(x)</td><td>S(x) = S<sub>max,1</sub>·exp(−x²/2i₁²) ${tw?'+ S<sub>max,2</sub>·exp(−(x−s)²/2i₂²)':''}</td><td>Peck (1969)${tw?'; superposition (Sec. 2.4)':''}</td></tr>
+    <tr><td>Longitudinal trough, S(y)</td><td>S(y) = S<sub>max,x0</sub>·Φ(y/i)${tw?' (summed over both tunnels)':''}, &nbsp; S<sub>max,x0</sub> = S<sub>max</sub>·exp(−x₀²/2i²)</td><td>Attewell &amp; Woodman (1982)</td></tr>
+    <tr><td>Trough extent</td><td>Transverse: from min(c − 2.5i) to max(c + 2.5i); longitudinal: ±2.5i about y = 0. The building is not considered beyond this limit (S/S<sub>max</sub> = 0.044).</td><td>Mair, Taylor &amp; Burland (1996) Sec. 4.1</td></tr>
+    <tr><td>Zone partition</td><td>Building split at the points of inflexion of the combined profile, S″(x) = 0 (located numerically); sagging where S″ &lt; 0 (concave), hogging where S″ &gt; 0.</td><td>Mair, Taylor &amp; Burland (1996) Sec. 4.2</td></tr>
+    <tr><td>Beam height, H</td><td>H = foundation level to eaves${inp.basement?' = z<sub>b</sub> + H<sub>ag</sub>':''}; roof ignored</td><td>Mair, Taylor &amp; Burland (1996) Sec. 4.1</td></tr>
+    <tr><td>Deflection, Δ and DR</td><td>Δ = max|S(x) − chord(x)| within the zone (chord joins the zone ends); DR = Δ / L<sub>zone</sub></td><td>Burland &amp; Wroth (1974)</td></tr>
+    <tr><td>Neutral axis t; second moment I</td><td>Sagging: t = H/2, I = H³/12 &nbsp;|&nbsp; Hogging: t = H, I = H³/3</td><td>Burland et al. (1977)</td></tr>
+    <tr><td>Bending strain, ε<sub>b,max</sub></td><td>DR = ε<sub>b,max</sub> · [ L/(12t) + 3I/(2tLH) · (E/G) ]</td><td>Burland et al. (1977), eq. 7</td></tr>
+    <tr><td>Diagonal strain, ε<sub>d,max</sub></td><td>DR = ε<sub>d,max</sub> · [ 1 + (HL²/18I) · (G/E) ]</td><td>Burland et al. (1977), eq. 8</td></tr>
+    <tr><td>Horizontal movement, S<sub>h</sub></td><td>S<sub>h</sub> = −Σ [ (x − c)/(z₀ − z<sub>b</sub>) ] · S<sub>v</sub> (vectors directed toward the tunnel axis; z<sub>b</sub> = 0 at surface)</td><td>O'Reilly &amp; New (1982)</td></tr>
+    <tr><td>Average horizontal strain, ε<sub>h</sub></td><td>ε<sub>h</sub> = [ S<sub>h</sub>(z<sub>e</sub>) − S<sub>h</sub>(z<sub>s</sub>) ] / L<sub>zone</sub> &nbsp;(tension +; compressive within the inflexion points)</td><td>Mair, Taylor &amp; Burland (1996) Sec. 4.3</td></tr>
+    <tr><td>Total bending strain, ε<sub>bt</sub></td><td>ε<sub>bt</sub> = ε<sub>b,max</sub> + ε<sub>h</sub></td><td>Mair, Taylor &amp; Burland (1996) eq. 9</td></tr>
+    <tr><td>Total diagonal strain, ε<sub>dt</sub></td><td>ε<sub>dt</sub> = 0.35ε<sub>h</sub> + √[ (0.65ε<sub>h</sub>)² + ε<sub>d,max</sub>² ] &nbsp;(Mohr's circle, ν = 0.3)</td><td>Mair, Taylor &amp; Burland (1996) eq. 10</td></tr>
+    <tr><td>Governing strain, ε<sub>max</sub></td><td>ε<sub>max</sub> = max( ε<sub>bt</sub> , ε<sub>dt</sub> )</td><td>Mair, Taylor &amp; Burland (1996) Sec. 5.3</td></tr>
+    <tr><td>Damage category</td><td>ε<sub>max</sub> compared with limiting tensile strain bands (Cat 0: ≤ 0.05%, 1: ≤ 0.075%, 2: ≤ 0.15%, 3: ≤ 0.30%, 4–5: &gt; 0.30%)</td><td>Boscardin &amp; Cording (1989)</td></tr>
+    <tr><td>Stage 1 screening</td><td>Eliminated if greenfield settlement under the building &lt; 10 mm and ground slope &lt; 1/500</td><td>Mair, Taylor &amp; Burland (1996) Sec. 5.2</td></tr>
+    ${tw?`<tr><td>Twin-tunnel spacing check</td><td>Clear separation = s − (D₁ + D₂)/2; warn if less than one tunnel diameter</td><td>Mair, Taylor &amp; Burland (1996) Sec. 2.4</td></tr>`:''}
+    </tbody>
+  </table></div></div>`;
 
   out.innerHTML = html;
 }
 
+/* ============================================================
+   Diagram
+   ============================================================ */
 function buildSVG(R){
-  const W = 760, Hsvg = 420;
-  const marginL = 60, marginR = 30;
-  const plotW = W - marginL - marginR;
-  const groundY = 175;
-  const settleExagg = 6;
+  const inp = R.inp, P = R.P;
+  const W = 760, Hsvg = 400;
+  const marginL = 60, marginR = 30, plotW = W - marginL - marginR;
+  const groundY = 170;
 
-  const allX = [R.x1in, R.x2in, -2.5*R.i1, 2.5*R.i1, 0];
-  if(R.twin){ allX.push(R.spacing-2.5*R.i2, R.spacing+2.5*R.i2, R.spacing); }
+  const allX = [R.x1in, R.x2in, P.lo, P.hi, 0];
+  if(inp.twin) allX.push(inp.spacing);
   let xmin = Math.min(...allX), xmax = Math.max(...allX);
-  const pad = (xmax-xmin)*0.08 || 5;
+  const pad = (xmax-xmin)*0.06 || 5;
   xmin -= pad; xmax += pad;
-  const xScale = (x)=> marginL + (x-xmin)/(xmax-xmin)*plotW;
+  const xScale = x => marginL + (x-xmin)/(xmax-xmin)*plotW;
 
-  const maxS = R.twin ? Math.max(R.Smax1_mm, R.Smax2_mm, R.profileFn(0), R.profileFn(R.spacing)) : R.Smax1_mm;
-  const sPxScale = (sMm)=> (sMm/Math.max(maxS,0.0001)) * 45;
-
-  let path = '';
-  const N = 160;
-  for(let k=0;k<=N;k++){
-    const x = xmin + (xmax-xmin)*k/N;
-    const s = R.profileFn(x);
-    const px = xScale(x), py = groundY + sPxScale(s);
-    path += (k===0?'M':'L') + px.toFixed(1) + ' ' + py.toFixed(1) + ' ';
-  }
-
-  const bx1 = xScale(R.x1in), bx2 = xScale(R.x2in);
-  const buildingPxH = Math.max(50, Math.min(120, R.Hb*6));
+  // building geometry (schematic vertical scale)
+  const Hag = R.Hag;
+  const buildingPxH = Math.max(50, Math.min(110, Hag*6));
+  const pxPerM = buildingPxH/Hag;
+  const bsmtPx = inp.basement ? Math.min(60, Math.max(22, R.zb*pxPerM)) : 0;
+  const baseY = groundY + bsmtPx;           // foundation level
   const buildingTop = groundY - buildingPxH;
 
+  // settlement curve at foundation level (exaggerated)
+  const N = 180;
+  let maxS = 1e-6;
+  const samples = [];
+  for(let k=0;k<=N;k++){
+    const x = xmin + (xmax-xmin)*k/N, s = P.S(x);
+    samples.push([x,s]); if(s>maxS) maxS=s;
+  }
+  let path = '';
+  samples.forEach(([x,s],k)=>{
+    path += (k===0?'M':'L') + xScale(x).toFixed(1) + ' ' + (baseY + s/maxS*40).toFixed(1) + ' ';
+  });
+
+  const bx1 = xScale(R.x1in), bx2 = xScale(R.x2in);
+  const bxMin = Math.min(bx1,bx2), bxMax = Math.max(bx1,bx2), bW = bxMax-bxMin;
+
+  // zone shading
   let zoneRects = '';
   R.zones.forEach(z=>{
     const zx1 = xScale(z.zs), zx2 = xScale(z.ze);
-    const fill = z.zoneType==='sagging' ? 'rgba(27,79,114,0.08)' : 'rgba(214,137,16,0.10)';
-    zoneRects += `<rect x="${zx1.toFixed(1)}" y="${(groundY-4).toFixed(1)}" width="${(zx2-zx1).toFixed(1)}" height="10" fill="${fill}" stroke="none"/>`;
+    const fill = z.typ==='sagging' ? 'rgba(27,79,114,0.14)' : 'rgba(214,137,16,0.18)';
+    zoneRects += `<rect x="${zx1.toFixed(1)}" y="${(baseY-4).toFixed(1)}" width="${(zx2-zx1).toFixed(1)}" height="12" fill="${fill}"/>`;
   });
 
-  let infMarkers = '';
-  const infPts = R.orient==='transverse' ? [-R.i1, R.i1, ...(R.twin?[R.spacing-R.i2, R.spacing+R.i2]:[])] : [0];
-  infPts.forEach(ip=>{
+  // inflexion markers + trough extent markers
+  let marks = '';
+  R.inflAll.forEach(ip=>{
     const px = xScale(ip);
-    infMarkers += `<line x1="${px}" y1="${groundY-10}" x2="${px}" y2="${groundY+55}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="3,3"/>`;
-    infMarkers += `<text x="${px}" y="${groundY+68}" font-size="9" fill="#8a8a8a" text-anchor="middle" font-family="Roboto Mono, monospace">infl.</text>`;
+    marks += `<line x1="${px}" y1="${baseY-12}" x2="${px}" y2="${baseY+52}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="3,3"/>
+              <text x="${px}" y="${baseY+64}" font-size="9" fill="#8a8a8a" text-anchor="middle">infl.</text>`;
+  });
+  [P.lo, P.hi].forEach(ex=>{
+    const px = xScale(ex);
+    marks += `<line x1="${px}" y1="${baseY-12}" x2="${px}" y2="${baseY+30}" stroke="#C9C2B6" stroke-width="1" stroke-dasharray="1,3"/>
+              <text x="${px}" y="${baseY+42}" font-size="8.5" fill="#9a9a9a" text-anchor="middle">2.5i</text>`;
   });
 
   const originX = xScale(0);
-  const originLabel = R.orient==='transverse' ? 'Upline ℄' : 'inflection y=0';
+  const originLabel = inp.orient==='transverse' ? 'Upline CL' : 'inflexion y=0';
 
+  // tunnels (transverse only)
   let tunnelDraw = '';
-  if(R.orient==='transverse'){
+  if(inp.orient==='transverse'){
+    const cy = baseY + 105;
     const tX1 = xScale(0);
-    tunnelDraw += `<circle cx="${tX1}" cy="${groundY+95}" r="16" fill="#fff" stroke="var(--output-accent)" stroke-width="2"/>
-      <text x="${tX1}" y="${groundY+99}" font-size="9" text-anchor="middle" fill="var(--output-accent)" font-family="Roboto Mono, monospace">D₁=${fmt(R.D1,1)}m</text>
-      <line x1="${tX1}" y1="${groundY}" x2="${tX1}" y2="${groundY+79}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="2,2"/>
-      <text x="${tX1+22}" y="${groundY+50}" font-size="9" fill="#8a8a8a" font-family="Roboto Mono, monospace">z₀₁=${fmt(R.z0_1,1)}m</text>`;
-    if(R.twin){
-      const tX2 = xScale(R.spacing);
-      tunnelDraw += `<circle cx="${tX2}" cy="${groundY+95}" r="16" fill="#fff" stroke="#5C7A8F" stroke-width="2"/>
-        <text x="${tX2}" y="${groundY+99}" font-size="9" text-anchor="middle" fill="#5C7A8F" font-family="Roboto Mono, monospace">D₂=${fmt(R.D2,1)}m</text>
-        <line x1="${tX2}" y1="${groundY}" x2="${tX2}" y2="${groundY+79}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="2,2"/>
-        <text x="${tX2+22}" y="${groundY+65}" font-size="9" fill="#8a8a8a" font-family="Roboto Mono, monospace">z₀₂=${fmt(R.z0_2,1)}m</text>`;
+    tunnelDraw += `<circle cx="${tX1}" cy="${cy}" r="16" fill="#fff" stroke="var(--output-accent)" stroke-width="2"/>
+      <line x1="${tX1}" y1="${baseY+70}" x2="${tX1}" y2="${cy-16}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="2,2"/>
+      <text x="${tX1+22}" y="${cy-3}" font-size="9" fill="var(--output-accent)">D₁=${fmt(inp.t1.D,1)}m</text>
+      <text x="${tX1+22}" y="${cy+9}" font-size="9" fill="#8a8a8a">z₀₁=${fmt(R.z0_1,1)}m</text>`;
+    if(inp.twin){
+      const tX2 = xScale(inp.spacing);
+      tunnelDraw += `<circle cx="${tX2}" cy="${cy}" r="16" fill="#fff" stroke="#5C7A8F" stroke-width="2"/>
+        <line x1="${tX2}" y1="${baseY+70}" x2="${tX2}" y2="${cy-16}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="${tX2+22}" y="${cy-3}" font-size="9" fill="#5C7A8F">D₂=${fmt(inp.t2.D,1)}m</text>
+        <text x="${tX2+22}" y="${cy+9}" font-size="9" fill="#8a8a8a">z₀₂=${fmt(R.z0_2,1)}m</text>`;
     }
   }
 
+  // basement
+  let bsmtDraw = '';
+  if(inp.basement){
+    bsmtDraw += `<rect x="${bxMin.toFixed(1)}" y="${groundY}" width="${bW.toFixed(1)}" height="${bsmtPx.toFixed(1)}" fill="#E4EAEE" stroke="var(--input-accent)" stroke-width="1.8"/>`;
+    const lvH = bsmtPx/inp.nb;
+    for(let l=1;l<inp.nb;l++){
+      bsmtDraw += `<line x1="${bxMin.toFixed(1)}" y1="${(groundY+l*lvH).toFixed(1)}" x2="${bxMax.toFixed(1)}" y2="${(groundY+l*lvH).toFixed(1)}" stroke="var(--input-accent)" stroke-width="1" opacity="0.5"/>`;
+    }
+    bsmtDraw += `<text x="${((bxMin+bxMax)/2).toFixed(1)}" y="${(groundY+bsmtPx/2+3).toFixed(1)}" font-size="9.5" text-anchor="middle" fill="var(--input-accent)">${inp.nb}-level basement · zb=${fmt(R.zb,1)}m</text>`;
+    bsmtDraw += `<line x1="${marginL}" y1="${baseY}" x2="${W-marginR}" y2="${baseY}" stroke="#C9C2B6" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="${W-marginR}" y="${baseY-4}" font-size="9" fill="#9a9a9a" text-anchor="end">foundation level</text>`;
+  }
+
+  // storeys above ground
   let storeyDraw = '';
   {
-    const storeys = Math.max(1, Math.round(R.storeys||1));
+    const storeys = Math.max(1, Math.round(inp.storeys||1));
     const storeyH = buildingPxH/storeys;
-    const bxMin = Math.min(bx1,bx2), bxMax = Math.max(bx1,bx2);
-    const bWidth = bxMax-bxMin;
-    const nWin = Math.max(2, Math.min(6, Math.round(bWidth/28)));
+    const nWin = Math.max(2, Math.min(6, Math.round(bW/28)));
     for(let s=0;s<storeys;s++){
       const rowTop = buildingTop + s*storeyH;
       if(s>0){
         storeyDraw += `<line x1="${bxMin.toFixed(1)}" y1="${rowTop.toFixed(1)}" x2="${bxMax.toFixed(1)}" y2="${rowTop.toFixed(1)}" stroke="var(--input-accent)" stroke-width="1" opacity="0.5"/>`;
       }
-      const winW = Math.min(13, bWidth/(nWin*2.4));
-      const winH = Math.min(storeyH*0.45, 13);
-      const rowCenterY = rowTop + storeyH/2;
+      const winW = Math.min(13, bW/(nWin*2.4)), winH = Math.min(storeyH*0.45, 13);
+      const cyRow = rowTop + storeyH/2;
       for(let w=0; w<nWin; w++){
-        const cx = bxMin + bWidth*(w+0.5)/nWin;
-        storeyDraw += `<rect x="${(cx-winW/2).toFixed(1)}" y="${(rowCenterY-winH/2).toFixed(1)}" width="${winW.toFixed(1)}" height="${winH.toFixed(1)}" fill="#DCE7ED" stroke="var(--input-accent)" stroke-width="0.7" opacity="0.85"/>`;
+        const cx = bxMin + bW*(w+0.5)/nWin;
+        storeyDraw += `<rect x="${(cx-winW/2).toFixed(1)}" y="${(cyRow-winH/2).toFixed(1)}" width="${winW.toFixed(1)}" height="${winH.toFixed(1)}" fill="#DCE7ED" stroke="var(--input-accent)" stroke-width="0.7" opacity="0.85"/>`;
       }
     }
   }
 
+  // governing zone
   const governing = R.zones.reduce((a,b)=> (!a || b.emaxPct>a.emaxPct)? b : a, null);
   let govBox = '';
   if(governing){
     const gx1 = xScale(governing.zs), gx2 = xScale(governing.ze);
-    const govBoxH = (groundY + 8) - (buildingTop - 4);
-    govBox = `<rect x="${gx1.toFixed(1)}" y="${(buildingTop-4).toFixed(1)}" width="${(gx2-gx1).toFixed(1)}" height="${govBoxH.toFixed(1)}" fill="none" stroke="var(--fail)" stroke-width="1.6" stroke-dasharray="5,3"/>
-      <text x="${((gx1+gx2)/2).toFixed(1)}" y="${(buildingTop-22).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="var(--fail)" font-family="Roboto Mono, monospace" font-weight="700">DR=${fmt(governing.DR*1000,2)}‰  ε=${fmt(governing.emaxPct,3)}%</text>`;
+    govBox = `<rect x="${gx1.toFixed(1)}" y="${(buildingTop-4).toFixed(1)}" width="${(gx2-gx1).toFixed(1)}" height="${((baseY+8)-(buildingTop-4)).toFixed(1)}" fill="none" stroke="var(--fail)" stroke-width="1.6" stroke-dasharray="5,3"/>
+      <text x="${((gx1+gx2)/2).toFixed(1)}" y="${(buildingTop-22).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="var(--fail)" font-weight="700">DR=${fmt(governing.DR*1000,3)}‰  ε=${fmt(governing.emaxPct,4)}%</text>`;
+  } else {
+    govBox = `<text x="${((bxMin+bxMax)/2).toFixed(1)}" y="${(buildingTop-22).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="var(--pass)" font-weight="700">outside trough extent</text>`;
   }
 
-  const svg = `
+  const nSt = Math.max(1, Math.round(inp.storeys||1));
+  return `
   <svg id="trough" viewBox="0 0 ${W} ${Hsvg}" xmlns="http://www.w3.org/2000/svg">
     <style>text{font-family:'Roboto Mono',monospace;}</style>
     <line x1="${marginL}" y1="${groundY}" x2="${W-marginR}" y2="${groundY}" stroke="#C9C2B6" stroke-width="1"/>
-    <text x="${marginL}" y="${groundY-8}" font-size="10" fill="#9a9a9a">ground surface (datum)</text>
+    <text x="${marginL}" y="${groundY-8}" font-size="10" fill="#9a9a9a">ground surface (NGL)</text>
 
     ${zoneRects}
-    ${infMarkers}
+    ${marks}
 
     <path d="${path}" fill="none" stroke="var(--output-accent)" stroke-width="2"/>
-    <line x1="${originX}" y1="${groundY-15}" x2="${originX}" y2="${groundY+15}" stroke="var(--output-accent)" stroke-width="1" stroke-dasharray="2,2"/>
-    <text x="${originX}" y="${groundY+28}" font-size="9" fill="var(--output-accent)" text-anchor="middle">${originLabel}</text>
+    <line x1="${originX}" y1="${baseY-15}" x2="${originX}" y2="${baseY+15}" stroke="var(--output-accent)" stroke-width="1" stroke-dasharray="2,2"/>
+    <text x="${originX}" y="${baseY+28}" font-size="9" fill="var(--output-accent)" text-anchor="middle">${originLabel}</text>
 
     ${tunnelDraw}
+    ${bsmtDraw}
 
-    <rect x="${Math.min(bx1,bx2).toFixed(1)}" y="${buildingTop.toFixed(1)}" width="${Math.abs(bx2-bx1).toFixed(1)}" height="${buildingPxH.toFixed(1)}"
-      fill="#FDFCFA" stroke="var(--input-accent)" stroke-width="1.8"/>
+    <rect x="${bxMin.toFixed(1)}" y="${buildingTop.toFixed(1)}" width="${bW.toFixed(1)}" height="${buildingPxH.toFixed(1)}" fill="#FDFCFA" stroke="var(--input-accent)" stroke-width="1.8"/>
     ${storeyDraw}
-    <text x="${((bx1+bx2)/2).toFixed(1)}" y="${(buildingTop-8).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="var(--input-accent)" font-weight="700">${Math.max(1,Math.round(R.storeys||1))}-storey · L=${fmt(R.Lb,1)}m  H=${fmt(R.Hb,1)}m</text>
+    <text x="${((bx1+bx2)/2).toFixed(1)}" y="${(buildingTop-8).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="var(--input-accent)" font-weight="700">${nSt}-storey${inp.basement?(' + '+inp.nb+' basement'):''} · L=${fmt(inp.Lb,1)}m  H=${fmt(R.H,1)}m</text>
 
     ${govBox}
 
-    <text x="${W-marginR}" y="${Hsvg-14}" font-size="9.5" fill="#9a9a9a" text-anchor="end">Settlement scale exaggerated for clarity · building height drawn schematically</text>
-    <text x="${marginL}" y="${Hsvg-14}" font-size="9.5" fill="#9a9a9a">S<tspan baseline-shift="sub" font-size="7">max</tspan> combined = ${fmt(R.profileFn(R.twin?(0+R.spacing)/2:0),1)} mm at midspan (see curve)</text>
+    <text x="${W-marginR}" y="${Hsvg-12}" font-size="9" fill="#9a9a9a" text-anchor="end">Settlement scale exaggerated · profile shown at foundation level · building height schematic</text>
+    <text x="${marginL}" y="${Hsvg-12}" font-size="9" fill="#9a9a9a">max S = ${fmt(maxS,2)} mm</text>
   </svg>`;
-  return svg;
 }
 </script>
 </body>
