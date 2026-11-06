@@ -818,101 +818,136 @@ function renderResults(R){
    ============================================================ */
 function buildSVG(R){
   const inp = R.inp, P = R.P;
-  const W = 760, Hsvg = 400;
-  const marginL = 60, marginR = 30, plotW = W - marginL - marginR;
-  const groundY = 170;
+  const trans = inp.orient==='transverse';
+  const W = 760, marginL = 60, marginR = 30, plotW = W - marginL - marginR;
 
+  // ---- horizontal domain & true scale (px per metre) ----
   const allX = [R.x1in, R.x2in, P.lo, P.hi, 0];
   if(inp.twin) allX.push(inp.spacing);
   let xmin = Math.min(...allX), xmax = Math.max(...allX);
   const pad = (xmax-xmin)*0.06 || 5;
   xmin -= pad; xmax += pad;
-  const xScale = x => marginL + (x-xmin)/(xmax-xmin)*plotW;
+  const scale = plotW/(xmax-xmin);
+  const xScale = x => marginL + (x-xmin)*scale;
 
-  // building geometry (schematic vertical scale)
+  // ---- ground levels (absolute) ----
+  const ngl1 = inp.t1.ngl, ngl2 = inp.twin ? inp.t2.ngl : inp.t1.ngl;
+  const gl = x => {
+    if(!inp.twin || !trans || inp.spacing===0) return ngl1;
+    const lo = Math.min(0, inp.spacing), hi = Math.max(0, inp.spacing);
+    const gLo = inp.spacing>0 ? ngl1 : ngl2, gHi = inp.spacing>0 ? ngl2 : ngl1;
+    if(x<=lo) return gLo; if(x>=hi) return gHi;
+    return gLo + (gHi-gLo)*(x-lo)/(hi-lo);
+  };
+  const groundDiffers = inp.twin && trans && Math.abs(ngl1-ngl2)>1e-9;
+
+  // ---- building geometry (true scale; height exaggerated only if it would be tiny) ----
   const Hag = R.Hag;
-  const buildingPxH = Math.max(50, Math.min(110, Hag*6));
-  const pxPerM = buildingPxH/Hag;
-  const bsmtPx = inp.basement ? Math.min(60, Math.max(22, R.zb*pxPerM)) : 0;
-  const baseY = groundY + bsmtPx;           // foundation level
-  const buildingTop = groundY - buildingPxH;
+  const bScale = Math.max(scale, 28/Hag);
+  const bClamped = bScale > scale + 1e-9;
+  const glB = gl((R.x1in+R.x2in)/2);
+  const Lref = Math.max(ngl1, ngl2, glB);
+  const yOf = lvl => (Lref - lvl)*scale;               // y (px) of an absolute level
+  const yG = yOf(glB);                                  // building ground level
+  const bsmtPx = inp.basement ? R.zb*bScale : 0;
+  const yF = yG + bsmtPx;                               // foundation level (profile baseline)
+  const buildingTop = yG - Hag*bScale;
 
-  // settlement curve at foundation level (exaggerated)
+  const bx1 = xScale(R.x1in), bx2 = xScale(R.x2in);
+  const bxMin = Math.min(bx1,bx2), bxMax = Math.max(bx1,bx2), bW = bxMax-bxMin;
+
+  // ---- settlement curve at foundation level (exaggerated) ----
   const N = 180;
-  let maxS = 1e-6;
-  const samples = [];
+  let maxS = 1e-6; const samples = [];
   for(let k=0;k<=N;k++){
     const x = xmin + (xmax-xmin)*k/N, s = P.S(x);
     samples.push([x,s]); if(s>maxS) maxS=s;
   }
   let path = '';
   samples.forEach(([x,s],k)=>{
-    path += (k===0?'M':'L') + xScale(x).toFixed(1) + ' ' + (baseY + s/maxS*40).toFixed(1) + ' ';
+    path += (k===0?'M':'L') + xScale(x).toFixed(1) + ' ' + (yF + s/maxS*40).toFixed(1) + ' ';
   });
 
-  const bx1 = xScale(R.x1in), bx2 = xScale(R.x2in);
-  const bxMin = Math.min(bx1,bx2), bxMax = Math.max(bx1,bx2), bW = bxMax-bxMin;
+  // text with a white backing halo (two stacked elements: works in every renderer)
+  const T = (x, y, txt, o) => {
+    const a = `x="${(+x).toFixed(1)}" y="${(+y).toFixed(1)}" font-size="${o.size||9}" text-anchor="${o.anchor||'start'}"${o.weight?` font-weight="${o.weight}"`:''}`;
+    return `<text ${a} fill="#fff" stroke="#fff" stroke-width="3.5" stroke-linejoin="round">${txt}</text><text ${a} fill="${o.fill||'#6a6a6a'}">${txt}</text>`;
+  };
 
-  // zone shading
+  // ---- ground line ----
+  let gpts = [[xmin, gl(xmin)]];
+  if(inp.twin && trans){ gpts.push([Math.min(0,inp.spacing), gl(Math.min(0,inp.spacing))], [Math.max(0,inp.spacing), gl(Math.max(0,inp.spacing))]); }
+  gpts.push([xmax, gl(xmax)]);
+  const groundPath = gpts.map((q,k)=> (k?'L':'M') + xScale(q[0]).toFixed(1) + ' ' + yOf(q[1]).toFixed(1)).join(' ');
+  // ground label only for the longitudinal view; in the transverse view each tunnel label carries its own NGL
+  let groundLabels = '';
+  if(!trans){
+    groundLabels = T(marginL, yOf(ngl1)-8, `ground surface (NGL = ${fmt(ngl1,2)})`, {size:10, fill:'#8a8a8a'});
+  }
+
+  // ---- zone shading ----
   let zoneRects = '';
   R.zones.forEach(z=>{
     const zx1 = xScale(z.zs), zx2 = xScale(z.ze);
     const fill = z.typ==='sagging' ? 'rgba(27,79,114,0.14)' : 'rgba(214,137,16,0.18)';
-    zoneRects += `<rect x="${zx1.toFixed(1)}" y="${(baseY-4).toFixed(1)}" width="${(zx2-zx1).toFixed(1)}" height="12" fill="${fill}"/>`;
+    zoneRects += `<rect x="${zx1.toFixed(1)}" y="${(yF-4).toFixed(1)}" width="${(zx2-zx1).toFixed(1)}" height="12" fill="${fill}"/>`;
   });
 
-  // inflexion markers + trough extent markers
+  // ---- inflexion + extent markers ----
   let marks = '';
   R.inflAll.forEach(ip=>{
     const px = xScale(ip);
-    marks += `<line x1="${px}" y1="${baseY-12}" x2="${px}" y2="${baseY+52}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="3,3"/>
-              <text x="${px}" y="${baseY+64}" font-size="9" fill="#8a8a8a" text-anchor="middle">infl.</text>`;
+    marks += `<line x1="${px}" y1="${yF-12}" x2="${px}" y2="${yF+52}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="3,3"/>
+              <text x="${px}" y="${yF+64}" font-size="9" fill="#8a8a8a" text-anchor="middle">infl.</text>`;
   });
   [P.lo, P.hi].forEach(ex=>{
     const px = xScale(ex);
-    marks += `<line x1="${px}" y1="${baseY-12}" x2="${px}" y2="${baseY+30}" stroke="#C9C2B6" stroke-width="1" stroke-dasharray="1,3"/>
-              <text x="${px}" y="${baseY+42}" font-size="8.5" fill="#9a9a9a" text-anchor="middle">2.5i</text>`;
+    marks += `<line x1="${px}" y1="${yF-12}" x2="${px}" y2="${yF+30}" stroke="#C9C2B6" stroke-width="1" stroke-dasharray="1,3"/>
+              <text x="${px}" y="${yF+42}" font-size="8.5" fill="#9a9a9a" text-anchor="middle">2.5i</text>`;
   });
-
   const originX = xScale(0);
-  const originLabel = inp.orient==='transverse' ? 'Upline CL' : 'inflexion y=0';
+  const originLabel = trans ? 'Upline CL' : 'inflexion y=0';
 
-  // tunnels (transverse only)
-  let tunnelDraw = '';
-  if(inp.orient==='transverse'){
-    const cy = baseY + 105;
-    const tX1 = xScale(0);
-    tunnelDraw += `<circle cx="${tX1}" cy="${cy}" r="16" fill="#fff" stroke="var(--output-accent)" stroke-width="2"/>
-      <line x1="${tX1}" y1="${baseY+70}" x2="${tX1}" y2="${cy-16}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="2,2"/>
-      <text x="${tX1+22}" y="${cy-3}" font-size="9" fill="var(--output-accent)">D₁=${fmt(inp.t1.D,1)}m</text>
-      <text x="${tX1+22}" y="${cy+9}" font-size="9" fill="#8a8a8a">z₀₁=${fmt(R.z0_1,1)}m</text>`;
-    if(inp.twin){
-      const tX2 = xScale(inp.spacing);
-      tunnelDraw += `<circle cx="${tX2}" cy="${cy}" r="16" fill="#fff" stroke="#5C7A8F" stroke-width="2"/>
-        <line x1="${tX2}" y1="${baseY+70}" x2="${tX2}" y2="${cy-16}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="2,2"/>
-        <text x="${tX2+22}" y="${cy-3}" font-size="9" fill="#5C7A8F">D₂=${fmt(inp.t2.D,1)}m</text>
-        <text x="${tX2+22}" y="${cy+9}" font-size="9" fill="#8a8a8a">z₀₂=${fmt(R.z0_2,1)}m</text>`;
-    }
+  // ---- tunnels: own level, own diameter, own ground (transverse only) ----
+  let tunnelDraw = '', bottomY = yF + 75;
+  if(trans){
+    const list = [{t:inp.t1, c:0, z0:R.z0_1, tag:'₁', col:'var(--output-accent)', lab:'#1B4F72'}];
+    if(inp.twin) list.push({t:inp.t2, c:inp.spacing, z0:R.z0_2, tag:'₂', col:'#5C7A8F', lab:'#5C7A8F'});
+    const leftC = Math.min(...list.map(q=>q.c));
+    list.forEach(q=>{
+      const axisLvl = q.t.rl - q.t.dinv + q.t.D/2;
+      const cx = xScale(q.c), cy = yOf(axisLvl), r = q.t.D/2*scale;
+      const gY = yOf(q.t.ngl);
+      tunnelDraw += `<line x1="${cx.toFixed(1)}" y1="${gY.toFixed(1)}" x2="${cx.toFixed(1)}" y2="${(cy-r).toFixed(1)}" stroke="#B0A99C" stroke-width="1" stroke-dasharray="2,2"/>
+        <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="#fff" stroke="${q.col}" stroke-width="2"/>`;
+      const onLeft = inp.twin && q.c===leftC;
+      const tx = onLeft ? cx - r - 6 : cx + r + 6, anc = onLeft ? 'end' : 'start';
+      tunnelDraw += T(tx, cy-8, `D${q.tag}=${fmt(q.t.D,2)} m`, {fill:q.lab, anchor:anc})
+        + T(tx, cy+4, `z₀${q.tag}=${fmt(q.z0,2)} m`, {anchor:anc})
+        + T(tx, cy+16, `axis ${fmt(axisLvl,2)}`, {anchor:anc})
+        + T(tx, cy+28, `NGL ${fmt(q.t.ngl,2)}`, {anchor:anc});
+      bottomY = Math.max(bottomY, cy + r + 14, cy + 36);
+    });
   }
 
-  // basement
+  // ---- basement ----
   let bsmtDraw = '';
   if(inp.basement){
-    bsmtDraw += `<rect x="${bxMin.toFixed(1)}" y="${groundY}" width="${bW.toFixed(1)}" height="${bsmtPx.toFixed(1)}" fill="#E4EAEE" stroke="var(--input-accent)" stroke-width="1.8"/>`;
+    bsmtDraw += `<rect x="${bxMin.toFixed(1)}" y="${yG.toFixed(1)}" width="${bW.toFixed(1)}" height="${bsmtPx.toFixed(1)}" fill="#E4EAEE" stroke="var(--input-accent)" stroke-width="1.8"/>`;
     const lvH = bsmtPx/inp.nb;
     for(let l=1;l<inp.nb;l++){
-      bsmtDraw += `<line x1="${bxMin.toFixed(1)}" y1="${(groundY+l*lvH).toFixed(1)}" x2="${bxMax.toFixed(1)}" y2="${(groundY+l*lvH).toFixed(1)}" stroke="var(--input-accent)" stroke-width="1" opacity="0.5"/>`;
+      bsmtDraw += `<line x1="${bxMin.toFixed(1)}" y1="${(yG+l*lvH).toFixed(1)}" x2="${bxMax.toFixed(1)}" y2="${(yG+l*lvH).toFixed(1)}" stroke="var(--input-accent)" stroke-width="1" opacity="0.5"/>`;
     }
-    bsmtDraw += `<text x="${((bxMin+bxMax)/2).toFixed(1)}" y="${(groundY+bsmtPx/2+3).toFixed(1)}" font-size="9.5" text-anchor="middle" fill="var(--input-accent)">${inp.nb}-level basement · zb=${fmt(R.zb,1)}m</text>`;
-    bsmtDraw += `<line x1="${marginL}" y1="${baseY}" x2="${W-marginR}" y2="${baseY}" stroke="#C9C2B6" stroke-width="1" stroke-dasharray="4,3"/>
-      <text x="${W-marginR}" y="${baseY-4}" font-size="9" fill="#9a9a9a" text-anchor="end">foundation level</text>`;
+    bsmtDraw += `<text x="${((bxMin+bxMax)/2).toFixed(1)}" y="${(yG+bsmtPx/2+3).toFixed(1)}" font-size="9.5" text-anchor="middle" fill="var(--input-accent)">${inp.nb}-level basement · zb=${fmt(R.zb,1)}m</text>
+      <line x1="${marginL}" y1="${yF.toFixed(1)}" x2="${W-marginR}" y2="${yF.toFixed(1)}" stroke="#C9C2B6" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="${W-marginR}" y="${(yF-4).toFixed(1)}" font-size="9" fill="#9a9a9a" text-anchor="end">foundation level</text>`;
   }
 
-  // storeys above ground
+  // ---- storeys above ground ----
   let storeyDraw = '';
   {
     const storeys = Math.max(1, Math.round(inp.storeys||1));
-    const storeyH = buildingPxH/storeys;
+    const aboveH = Hag*bScale, storeyH = aboveH/storeys;
     const nWin = Math.max(2, Math.min(6, Math.round(bW/28)));
     for(let s=0;s<storeys;s++){
       const rowTop = buildingTop + s*storeyH;
@@ -928,41 +963,43 @@ function buildSVG(R){
     }
   }
 
-  // governing zone
+  // ---- governing zone ----
   const governing = R.zones.reduce((a,b)=> (!a || b.emaxPct>a.emaxPct)? b : a, null);
   let govBox = '';
   if(governing){
     const gx1 = xScale(governing.zs), gx2 = xScale(governing.ze);
-    govBox = `<rect x="${gx1.toFixed(1)}" y="${(buildingTop-4).toFixed(1)}" width="${(gx2-gx1).toFixed(1)}" height="${((baseY+8)-(buildingTop-4)).toFixed(1)}" fill="none" stroke="var(--fail)" stroke-width="1.6" stroke-dasharray="5,3"/>
-      <text x="${((gx1+gx2)/2).toFixed(1)}" y="${(buildingTop-22).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="var(--fail)" font-weight="700">DR=${fmt(governing.DR*1000,3)}‰  ε=${fmt(governing.emaxPct,4)}%</text>`;
+    govBox = `<rect x="${gx1.toFixed(1)}" y="${(buildingTop-4).toFixed(1)}" width="${(gx2-gx1).toFixed(1)}" height="${((yF+8)-(buildingTop-4)).toFixed(1)}" fill="none" stroke="var(--fail)" stroke-width="1.6" stroke-dasharray="5,3"/>
+      ${T((gx1+gx2)/2, buildingTop-22, `DR=${fmt(governing.DR*1000,3)}‰  ε=${fmt(governing.emaxPct,4)}%`, {size:10.5, fill:'#B0413E', anchor:'middle', weight:700})}`;
   } else {
-    govBox = `<text x="${((bxMin+bxMax)/2).toFixed(1)}" y="${(buildingTop-22).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="var(--pass)" font-weight="700">outside trough extent</text>`;
+    govBox = T((bxMin+bxMax)/2, buildingTop-22, 'outside trough extent', {size:10.5, fill:'#3F7D5C', anchor:'middle', weight:700});
   }
 
+  // ---- vertical extent & translation ----
+  const topY = Math.min(buildingTop - 30, yOf(Math.max(ngl1,ngl2)) - 20);
+  const dy = 12 - topY;
+  const Hsvg = Math.ceil(bottomY + dy + 34);
   const nSt = Math.max(1, Math.round(inp.storeys||1));
+  const note = 'Tunnel and building geometry to scale · settlement exaggerated' + (bClamped?' · building height exaggerated':'') + (groundDiffers?' · ground interpolated between tunnels':'');
+
   return `
   <svg id="trough" viewBox="0 0 ${W} ${Hsvg}" xmlns="http://www.w3.org/2000/svg">
     <style>text{font-family:'Roboto Mono',monospace;}</style>
-    <line x1="${marginL}" y1="${groundY}" x2="${W-marginR}" y2="${groundY}" stroke="#C9C2B6" stroke-width="1"/>
-    <text x="${marginL}" y="${groundY-8}" font-size="10" fill="#9a9a9a">ground surface (NGL)</text>
-
-    ${zoneRects}
-    ${marks}
-
-    <path d="${path}" fill="none" stroke="var(--output-accent)" stroke-width="2"/>
-    <line x1="${originX}" y1="${baseY-15}" x2="${originX}" y2="${baseY+15}" stroke="var(--output-accent)" stroke-width="1" stroke-dasharray="2,2"/>
-    <text x="${originX}" y="${baseY+28}" font-size="9" fill="var(--output-accent)" text-anchor="middle">${originLabel}</text>
-
-    ${tunnelDraw}
-    ${bsmtDraw}
-
-    <rect x="${bxMin.toFixed(1)}" y="${buildingTop.toFixed(1)}" width="${bW.toFixed(1)}" height="${buildingPxH.toFixed(1)}" fill="#FDFCFA" stroke="var(--input-accent)" stroke-width="1.8"/>
-    ${storeyDraw}
-    <text x="${((bx1+bx2)/2).toFixed(1)}" y="${(buildingTop-8).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="var(--input-accent)" font-weight="700">${nSt}-storey${inp.basement?(' + '+inp.nb+' basement'):''} · L=${fmt(inp.Lb,1)}m  H=${fmt(R.H,1)}m</text>
-
-    ${govBox}
-
-    <text x="${W-marginR}" y="${Hsvg-12}" font-size="9" fill="#9a9a9a" text-anchor="end">Settlement scale exaggerated · profile shown at foundation level · building height schematic</text>
+    <g transform="translate(0,${dy.toFixed(1)})">
+      <path d="${groundPath}" fill="none" stroke="#B9B2A5" stroke-width="1.5"/>
+      ${zoneRects}
+      ${marks}
+      ${tunnelDraw}
+      <path d="${path}" fill="none" stroke="var(--output-accent)" stroke-width="2"/>
+      <line x1="${originX}" y1="${yF-15}" x2="${originX}" y2="${yF+15}" stroke="var(--output-accent)" stroke-width="1" stroke-dasharray="2,2"/>
+      <text x="${originX}" y="${yF+28}" font-size="9" fill="var(--output-accent)" text-anchor="middle">${originLabel}</text>
+      ${bsmtDraw}
+      <rect x="${bxMin.toFixed(1)}" y="${buildingTop.toFixed(1)}" width="${bW.toFixed(1)}" height="${(Hag*bScale).toFixed(1)}" fill="#FDFCFA" stroke="var(--input-accent)" stroke-width="1.8"/>
+      ${storeyDraw}
+      ${T((bx1+bx2)/2, buildingTop-8, `${nSt}-storey${inp.basement?(' + '+inp.nb+' basement'):''} · L=${fmt(inp.Lb,1)}m  H=${fmt(R.H,1)}m`, {size:10.5, fill:'#3D5A73', anchor:'middle', weight:700})}
+      ${govBox}
+      ${groundLabels}
+    </g>
+    <text x="${W-marginR}" y="${Hsvg-12}" font-size="9" fill="#9a9a9a" text-anchor="end">${note}</text>
     <text x="${marginL}" y="${Hsvg-12}" font-size="9" fill="#9a9a9a">max S = ${fmt(maxS,2)} mm</text>
   </svg>`;
 }
